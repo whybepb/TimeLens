@@ -13,3 +13,6 @@ export type {
   Recommendation,
   RecommendationIcon,
 } from "./AdviceEngine";
+
+export { getShieldService, default as ShieldService } from "./ShieldService";
+export type { BlacklistedApp } from "./ShieldService";

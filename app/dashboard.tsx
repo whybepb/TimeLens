@@ -1,4 +1,4 @@
-import { View, ScrollView, RefreshControl } from "react-native";
+import { View, ScrollView, RefreshControl, TouchableOpacity, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -8,6 +8,7 @@ import {
   Smartphone,
   Focus,
   Hand,
+  Shield,
 } from "lucide-react-native";
 
 import {
@@ -16,7 +17,7 @@ import {
   DataCard,
   CoachInsightCard,
 } from "../src/components";
-import { useProductivityData, useCoachAdvice } from "../src/hooks";
+import { useProductivityData, useCoachAdvice, useShield } from "../src/hooks";
 
 // Helper to format minutes to hours and minutes string
 const formatMinutes = (minutes: number): string => {
@@ -37,6 +38,9 @@ export default function Dashboard() {
   
   // Use the coach advice hook - Strategy Pattern based recommendations
   const advice = useCoachAdvice();
+  
+  // Shield demo trigger
+  const { demoTrigger } = useShield();
 
   return (
     <View className="flex-1 bg-charcoal-900">
@@ -129,6 +133,18 @@ export default function Dashboard() {
               insight={advice.message}
               actionText={advice.actionLabel}
             />
+
+            {/* Demo: Test Shield Overlay */}
+            <TouchableOpacity
+              onPress={() => demoTrigger("Instagram")}
+              className="mt-4 flex-row items-center justify-center gap-2 bg-violet-500/20 border border-violet-500/40 rounded-xl py-3 px-4"
+              activeOpacity={0.7}
+            >
+              <Shield size={18} color="#A459FF" />
+              <Text className="text-violet-400 font-medium text-sm">
+                Demo: Test Focus Shield
+              </Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </SafeAreaView>
