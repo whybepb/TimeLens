@@ -16,7 +16,7 @@ import {
   DataCard,
   CoachInsightCard,
 } from "../src/components";
-import { useProductivityData } from "../src/hooks";
+import { useProductivityData, useCoachAdvice } from "../src/hooks";
 
 // Helper to format minutes to hours and minutes string
 const formatMinutes = (minutes: number): string => {
@@ -31,9 +31,12 @@ const formatNumber = (num: number): string => {
   return num.toLocaleString();
 };
 
-export default function Index() {
+export default function Dashboard() {
   // Use the productivity data hook - connected to DataManager singleton
-  const { stats, pvc, insight, isLoading, refresh } = useProductivityData();
+  const { stats, pvc, isLoading, refresh } = useProductivityData();
+  
+  // Use the coach advice hook - Strategy Pattern based recommendations
+  const advice = useCoachAdvice();
 
   return (
     <View className="flex-1 bg-charcoal-900">
@@ -121,10 +124,10 @@ export default function Index() {
               />
             </View>
 
-            {/* Coach Insight Card */}
+            {/* Coach Insight Card - Strategy Pattern based advice */}
             <CoachInsightCard
-              insight={insight}
-              actionText="Learn more"
+              insight={advice.message}
+              actionText={advice.actionLabel}
             />
           </View>
         </ScrollView>
