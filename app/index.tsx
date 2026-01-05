@@ -1,4 +1,4 @@
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -16,18 +16,24 @@ import {
   DataCard,
   CoachInsightCard,
 } from "../src/components";
+import { useProductivityData } from "../src/hooks";
+
+// Helper to format minutes to hours and minutes string
+const formatMinutes = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours === 0) return `${mins}m`;
+  return `${hours}h ${mins}m`;
+};
+
+// Helper to format number with commas
+const formatNumber = (num: number): string => {
+  return num.toLocaleString();
+};
 
 export default function Index() {
-  // Placeholder data - will be replaced with real health/screen time data
-  const pvcScore = 72;
-  const healthData = {
-    steps: "6,234",
-    sleepHours: "7.2",
-  };
-  const screenData = {
-    focusTime: "2h 45m",
-    pickups: "42",
-  };
+  // Use the productivity data hook - connected to DataManager singleton
+  const { stats, pvc, insight, isLoading, refresh } = useProductivityData();
 
   return (
     <View className="flex-1 bg-charcoal-900">
@@ -48,6 +54,13 @@ export default function Index() {
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={refresh}
+              tintColor="#1AA0FF"
+            />
+          }
         >
           {/* Header */}
           <DashboardHeader
@@ -57,7 +70,7 @@ export default function Index() {
 
           {/* PVC Hero Section */}
           <View className="items-center justify-center py-8">
-            <CircularProgress progress={pvcScore} />
+            <CircularProgress progress={pvc.score} />
           </View>
 
           {/* Data Grid */}
@@ -74,13 +87,13 @@ export default function Index() {
                     icon: Footprints,
                     iconColor: "#00E676",
                     label: "Steps",
-                    value: healthData.steps,
+                    value: formatNumber(stats.steps),
                   },
                   {
                     icon: Moon,
                     iconColor: "#A459FF",
                     label: "Sleep",
-                    value: healthData.sleepHours,
+                    value: stats.sleepHours.toFixed(1),
                     unit: "hrs",
                   },
                 ]}
@@ -96,13 +109,13 @@ export default function Index() {
                     icon: Focus,
                     iconColor: "#00E676",
                     label: "Focus Time",
-                    value: screenData.focusTime,
+                    value: formatMinutes(stats.focusTimeMinutes),
                   },
                   {
                     icon: Hand,
                     iconColor: "#FFAB00",
                     label: "Pickups",
-                    value: screenData.pickups,
+                    value: formatNumber(stats.pickups),
                   },
                 ]}
               />
@@ -110,8 +123,8 @@ export default function Index() {
 
             {/* Coach Insight Card */}
             <CoachInsightCard
-              insight="Your physical activity is low today. A 10-minute walk will boost your cognitive score."
-              actionText="Start a walk"
+              insight={insight}
+              actionText="Learn more"
             />
           </View>
         </ScrollView>
