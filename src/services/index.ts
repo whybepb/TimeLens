@@ -2,7 +2,7 @@ export { default as DataManager, getDataManager } from "./DataManager";
 export type { PVCResult, UserStats } from "./DataManager";
 
 export {
-  BalanceStrategy, HighPerformanceStrategy, default as RecommendationFactory, RecoveryStrategy, getRecommendationFactory
+  BalanceStrategy, getRecommendationFactory, HighPerformanceStrategy, default as RecommendationFactory, RecoveryStrategy
 } from "./AdviceEngine";
 export type {
   AdviceStrategy,
@@ -10,16 +10,16 @@ export type {
   RecommendationIcon
 } from "./AdviceEngine";
 
-export { default as ShieldService, getShieldService } from "./ShieldService";
+export { getShieldService, default as ShieldService } from "./ShieldService";
 export type { BlacklistedApp } from "./ShieldService";
 
 export {
-  default as WidgetService, reloadWidgetTimeline,
-  syncWidgetWithStats, updateWidgetData
+  reloadWidgetTimeline,
+  syncWidgetWithStats, updateWidgetData, default as WidgetService
 } from "./WidgetService";
 export type { WidgetData } from "./WidgetService";
 
-export { default as HealthService, getHealthService } from "./HealthService";
+export { getHealthService, default as HealthService } from "./HealthService";
 export type { HealthData, HealthPermissionStatus } from "./HealthService";
 
 export { default as AppwriteService, getAppwriteService } from "./AppwriteService";
@@ -28,15 +28,18 @@ export type {
   AIInsightResponse, AppwriteUser, Goal, HealthLog, UserProfile
 } from "./AppwriteService";
 
-export { default as GoalService, getGoalService } from "./GoalService";
+export { getGoalService, default as GoalService } from "./GoalService";
 export type { GoalProgress, GoalType, Goal as UserGoal, UserGoals } from "./GoalService";
 
-export { default as StreakService, getStreakService } from "./StreakService";
+export { getStreakService, default as StreakService } from "./StreakService";
 export type { DailyLog, Streak, StreakData, StreakType } from "./StreakService";
 
-export { default as LLMService, getLLMService } from "./LLMService";
+export { getLLMService, default as LLMService } from "./LLMService";
 export type { CoachingContext, LLMProvider, LLMResponse } from "./LLMService";
 
 export { default as FocusService, getFocusService } from "./FocusService";
 export type { FocusSession, FocusSettings, FocusStats, SessionType } from "./FocusService";
+
+export { getNotificationService, default as NotificationService } from "./NotificationService";
+export type { NotificationSettings, NotificationType } from "./NotificationService";
 

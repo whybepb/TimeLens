@@ -6,6 +6,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
+  Bell,
   ChartBar,
   Focus,
   Footprints,
@@ -33,7 +34,7 @@ import {
   StreakBadge,
 } from "../src/components";
 import { useAuth } from "../src/contexts";
-import { useCoachAdvice, useGoals, useProductivityData, useShield, useStreaks } from "../src/hooks";
+import { useCoachAdvice, useGoals, useNotifications, useProductivityData, useShield, useStreaks } from "../src/hooks";
 import { getGoalService, getStreakService } from "../src/services";
 
 // Helper to format minutes to hours and minutes string
@@ -74,6 +75,9 @@ export default function Dashboard() {
 
   // Shield demo trigger
   const { demoTrigger } = useShield();
+
+  // Notifications
+  const { requestPermissions, sendTestNotification } = useNotifications();
 
   return (
     <View className="flex-1 bg-charcoal-950">
@@ -262,6 +266,28 @@ export default function Dashboard() {
                 onPress={() => demoTrigger("Instagram")}
                 variant="ghost"
                 icon={Shield}
+                fullWidth
+              />
+            </Animated.View>
+
+            {/* Test Notifications */}
+            <Animated.View
+              entering={FadeInDown.delay(800).duration(400)}
+              className="mt-3"
+            >
+              <GlassButton
+                title="Test Notifications"
+                onPress={async () => {
+                  const granted = await requestPermissions();
+                  if (granted) {
+                    sendTestNotification();
+                    Alert.alert("Success", "Check your notification center!");
+                  } else {
+                    Alert.alert("Permission Denied", "Enable notifications in Settings.");
+                  }
+                }}
+                variant="ghost"
+                icon={Bell}
                 fullWidth
               />
             </Animated.View>

@@ -150,6 +150,14 @@ export function useFocusTimer(): UseFocusTimerReturn {
             intention || undefined
         );
 
+        // Send notification (async, don't await)
+        import("../services/NotificationService").then(({ getNotificationService }) => {
+            getNotificationService().sendFocusCompleteNotification(
+                Math.round(totalDuration / 60),
+                sessionType !== "focus"
+            );
+        });
+
         // Update focus session count
         if (sessionType === "focus") {
             setCompletedFocusSessions((prev) => prev + 1);
