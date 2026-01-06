@@ -1,4 +1,4 @@
-import { View, ScrollView, RefreshControl, TouchableOpacity, Text } from "react-native";
+import { View, ScrollView, RefreshControl, TouchableOpacity, Text, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -9,6 +9,7 @@ import {
   Focus,
   Hand,
   Shield,
+  Wifi,
 } from "lucide-react-native";
 
 import {
@@ -18,6 +19,7 @@ import {
   CoachInsightCard,
 } from "../src/components";
 import { useProductivityData, useCoachAdvice, useShield } from "../src/hooks";
+import { getAppwriteService } from "../src/services";
 
 // Helper to format minutes to hours and minutes string
 const formatMinutes = (minutes: number): string => {
@@ -100,8 +102,8 @@ export default function Dashboard() {
                     icon: Moon,
                     iconColor: "#A459FF",
                     label: "Sleep",
-                    value: stats.sleepHours.toFixed(1),
-                    unit: "hrs",
+                    value: stats.sleepHours !== null ? stats.sleepHours.toFixed(1) : "—",
+                    unit: stats.sleepHours !== null ? "hrs" : "",
                   },
                 ]}
               />
@@ -143,6 +145,31 @@ export default function Dashboard() {
               <Shield size={18} color="#A459FF" />
               <Text className="text-violet-400 font-medium text-sm">
                 Demo: Test Focus Shield
+              </Text>
+            </TouchableOpacity>
+
+            {/* Test Appwrite Connection */}
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  const appwrite = getAppwriteService();
+                  const connected = await appwrite.ping();
+                  Alert.alert(
+                    connected ? "✅ Success" : "❌ Failed",
+                    connected 
+                      ? "Appwrite connection successful!" 
+                      : "Could not connect to Appwrite"
+                  );
+                } catch (error: any) {
+                  Alert.alert("❌ Error", error.message || "Connection failed");
+                }
+              }}
+              className="mt-3 flex-row items-center justify-center gap-2 bg-cyan-500/20 border border-cyan-500/40 rounded-xl py-3 px-4"
+              activeOpacity={0.7}
+            >
+              <Wifi size={18} color="#00D9FF" />
+              <Text className="text-cyan-400 font-medium text-sm">
+                Send a Ping to Appwrite
               </Text>
             </TouchableOpacity>
           </View>

@@ -1,0 +1,15 @@
+{
+  "type": "widget",
+  "name": "PVC Widget",
+  "bundleIdentifier": "com.timelenses.app.PVCWidget",
+  "deploymentTarget": "17.0",
+  "entitlements": {
+    "com.apple.security.application-groups": [
+      "group.com.timelenses.productivity"
+    ]
+  },
+  "frameworks": [
+    "SwiftUI",
+    "WidgetKit"
+  ]
+}

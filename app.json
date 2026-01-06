@@ -9,7 +9,19 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.timelenses.app",
+      "appleTeamId": "84WAW6Z9P2",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "TimeLens needs access to your health data to calculate your Productivity-Vitality Score and provide personalized insights.",
+        "NSHealthUpdateUsageDescription": "TimeLens may update your health data to track your productivity goals."
+      },
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.timelenses.productivity"
+        ],
+        "com.apple.developer.healthkit": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -38,6 +50,9 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "@bacons/apple-targets"
       ]
     ],
     "experiments": {

@@ -4,6 +4,9 @@
  * Uses the Singleton Pattern for centralized state management
  */
 
+import { syncWidgetWithStats } from "./WidgetService";
+import { getHealthService, HealthData } from "./HealthService";
+
 // Types for user statistics
 export interface UserStats {
   // Health Data (from Apple HealthKit)
@@ -164,45 +167,91 @@ class DataManager {
     const stats = this.getUserStats();
     const pvc = this.calculatePVC();
     this.subscribers.forEach((callback) => callback(stats, pvc));
+    
+    // Sync data with iOS widget
+    this.syncToWidget(stats, pvc);
+  }
+
+  /**
+   * Sync current data to iOS Home Screen Widget
+   */
+  private syncToWidget(stats: UserStats, pvc: PVCResult): void {
+    syncWidgetWithStats({
+      score: pvc.score,
+      steps: stats.steps,
+      focusTimeMinutes: stats.focusTimeMinutes,
+    }).catch((error) => {
+      console.error("[DataManager] Widget sync failed:", error);
+    });
   }
 
   /**
    * Refresh all data from native APIs
-   * TODO: Implement actual API calls
+   * Fetches real HealthKit data when available
    */
   public async refreshData(): Promise<void> {
-    // TODO: Implement HealthKit data fetch
-    // const healthData = await HealthKitService.fetchTodayStats();
+    console.log('[DataManager] Refreshing data...');
     
-    // TODO: Implement DeviceActivity data fetch
-    // const screenTimeData = await DeviceActivityService.fetchTodayStats();
-
-    // For now, simulate a refresh with slightly modified dummy data
-    const currentStats = this.getUserStats();
-    this.updateStats({
-      steps: currentStats.steps + Math.floor(Math.random() * 100),
-      pickups: currentStats.pickups + Math.floor(Math.random() * 3),
-    });
+    try {
+      // Fetch real HealthKit data
+      const healthService = getHealthService();
+      const permissionStatus = healthService.getPermissionStatus();
+      
+      if (permissionStatus === 'granted') {
+        console.log('[DataManager] Fetching real HealthKit data...');
+        const healthData: HealthData = await healthService.getAllHealthData();
+        
+        // Update stats with real health data
+        this.updateStats({
+          steps: healthData.steps,
+          sleepHours: healthData.sleepHours,
+          activeCalories: healthData.activeCalories,
+        });
+        
+        console.log('[DataManager] Real health data loaded:', healthData);
+      } else {
+        console.log('[DataManager] HealthKit not authorized, using dummy data');
+        // Simulate refresh with slightly modified dummy data
+        const currentStats = this.getUserStats();
+        this.updateStats({
+          steps: currentStats.steps + Math.floor(Math.random() * 100),
+          pickups: currentStats.pickups + Math.floor(Math.random() * 3),
+        });
+      }
+      
+      // TODO: Implement DeviceActivity data fetch for screen time
+      // Screen Time API requires paid developer account
+      
+    } catch (error) {
+      console.error('[DataManager] Error refreshing data:', error);
+    }
 
     console.log('[DataManager] Data refreshed at:', new Date().toISOString());
   }
 
   /**
    * Request necessary permissions for health and screen time data
-   * TODO: Implement permission requests
    */
   public async requestPermissions(): Promise<{ health: boolean; screenTime: boolean }> {
-    // TODO: Request HealthKit permissions
-    // const healthPermission = await HealthKitService.requestPermissions([
-    //   'Steps', 'SleepAnalysis', 'ActiveEnergyBurned'
-    // ]);
+    console.log('[DataManager] Requesting permissions...');
+    
+    // Request HealthKit permissions
+    const healthService = getHealthService();
+    const healthStatus = await healthService.requestPermissions();
+    const healthGranted = healthStatus === 'granted';
+    
+    console.log('[DataManager] HealthKit permission:', healthStatus);
 
-    // TODO: Request Screen Time / DeviceActivity permissions
-    // Note: DeviceActivity requires Family Controls entitlement
-    // const screenTimePermission = await DeviceActivityService.requestAuthorization();
+    // Screen Time / DeviceActivity requires paid developer account
+    // For now, we'll return false for screenTime
+    const screenTimeGranted = false;
 
-    console.log('[DataManager] Permission request - using dummy grants');
-    return { health: true, screenTime: true };
+    // If health permissions granted, fetch initial data
+    if (healthGranted) {
+      await this.refreshData();
+    }
+
+    return { health: healthGranted, screenTime: screenTimeGranted };
   }
 
   /**
