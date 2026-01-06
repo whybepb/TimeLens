@@ -4,6 +4,7 @@
  * Uses the Singleton Pattern for centralized state management
  */
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getHealthService, HealthData } from "./HealthService";
 import { syncWidgetWithStats } from "./WidgetService";
 
@@ -37,15 +38,22 @@ export interface PVCResult {
 
 type Subscriber = (stats: UserStats, pvc: PVCResult) => void;
 
+// AsyncStorage key for persisting user stats
+const STORAGE_KEY = '@TimeLens:UserStats';
+
 class DataManager {
   private static instance: DataManager;
   private subscribers: Set<Subscriber> = new Set();
   private _userStats: UserStats;
+  private isInitializing: boolean = false;
 
   private constructor() {
-    // Initialize with dummy data
-    // TODO: Load persisted data from AsyncStorage on init
+    // Initialize with dummy data temporarily
+    // Real data will be loaded from AsyncStorage or fetched fresh
     this._userStats = this.getDummyData();
+
+    // Load persisted data and auto-refresh
+    this.initializeData();
   }
 
   /**
@@ -143,6 +151,11 @@ class DataManager {
       lastUpdated: new Date(),
     };
     this.notifySubscribers();
+
+    // Persist to AsyncStorage (fire and forget)
+    this.persistData().catch((error) => {
+      console.error('[DataManager] Failed to persist data after update:', error);
+    });
   }
 
   /**
@@ -186,6 +199,72 @@ class DataManager {
   }
 
   /**
+   * Initialize data from AsyncStorage and fetch fresh data
+   * Called automatically when DataManager is created
+   */
+  private async initializeData(): Promise<void> {
+    if (this.isInitializing) return; // Prevent duplicate initialization
+    this.isInitializing = true;
+
+    try {
+      console.log('[DataManager] Initializing data...');
+
+      // 1. Try to load persisted data first (fast)
+      const persistedData = await this.loadPersistedData();
+      if (persistedData) {
+        console.log('[DataManager] Loaded persisted data:', persistedData);
+        this._userStats = persistedData;
+        this.notifySubscribers();
+      }
+
+      // 2. Then fetch fresh data in the background (slower but accurate)
+      await this.refreshData();
+
+    } catch (error) {
+      console.error('[DataManager] Initialization error:', error);
+    } finally {
+      this.isInitializing = false;
+    }
+  }
+
+  /**
+   * Load persisted user stats from AsyncStorage
+   */
+  private async loadPersistedData(): Promise<UserStats | null> {
+    try {
+      const jsonData = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!jsonData) {
+        console.log('[DataManager] No persisted data found');
+        return null;
+      }
+
+      const parsed = JSON.parse(jsonData);
+      // Convert lastUpdated back to Date object
+      parsed.lastUpdated = new Date(parsed.lastUpdated);
+
+      console.log('[DataManager] Successfully loaded persisted data');
+      return parsed as UserStats;
+    } catch (error) {
+      console.error('[DataManager] Error loading persisted data:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Persist current user stats to AsyncStorage
+   */
+  private async persistData(): Promise<void> {
+    try {
+      const jsonData = JSON.stringify(this._userStats);
+      await AsyncStorage.setItem(STORAGE_KEY, jsonData);
+      console.log('[DataManager] Data persisted to AsyncStorage');
+    } catch (error) {
+      console.error('[DataManager] Error persisting data:', error);
+    }
+  }
+
+
+  /**
    * Refresh all data from native APIs
    * Fetches real HealthKit data when available
    */
@@ -195,7 +274,15 @@ class DataManager {
     try {
       // Fetch real HealthKit data
       const healthService = getHealthService();
-      const permissionStatus = healthService.getPermissionStatus();
+      let permissionStatus = healthService.getPermissionStatus();
+
+      // If permission status is unknown, try to initialize HealthKit
+      // This happens on app restart when the singleton resets
+      if (permissionStatus === 'unknown') {
+        console.log('[DataManager] Permission status unknown, trying to initialize HealthKit...');
+        permissionStatus = await healthService.requestPermissions();
+        console.log('[DataManager] HealthKit initialization result:', permissionStatus);
+      }
 
       if (permissionStatus === 'granted') {
         console.log('[DataManager] Fetching real HealthKit data...');
@@ -210,7 +297,7 @@ class DataManager {
 
         console.log('[DataManager] Real health data loaded:', healthData);
       } else {
-        console.log('[DataManager] HealthKit not authorized, using dummy data');
+        console.log('[DataManager] HealthKit not authorized (status:', permissionStatus, '), using dummy data');
         // Simulate refresh with slightly modified dummy data
         const currentStats = this.getUserStats();
         this.updateStats({

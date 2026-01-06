@@ -1,8 +1,9 @@
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ONBOARDING_COMPLETE_KEY = "@timelens/onboarding_complete";
+export const ONBOARDING_COMPLETE_KEY = "@timelens/onboarding_complete";
 
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
@@ -14,11 +15,9 @@ export default function Index() {
 
   const checkOnboardingStatus = async () => {
     try {
-      // TODO: Check if onboarding has been completed
-      // For now, always show onboarding
-      // const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-      // setHasCompletedOnboarding(completed === "true");
-      setHasCompletedOnboarding(false);
+      // Check if onboarding has been completed
+      const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
+      setHasCompletedOnboarding(completed === "true");
     } catch (error) {
       console.error("Error checking onboarding status:", error);
       setHasCompletedOnboarding(false);

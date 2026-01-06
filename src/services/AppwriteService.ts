@@ -4,10 +4,14 @@
  */
 
 import { Account, Client, Databases, Functions, ID, Query } from "react-native-appwrite";
+import { Platform } from "react-native";
 
 // Appwrite Configuration from environment variables
 const APPWRITE_ENDPOINT = process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT || "https://sgp.cloud.appwrite.io/v1";
 const APPWRITE_PROJECT_ID = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID || "";
+
+// Bundle ID for iOS platform authentication
+const IOS_BUNDLE_ID = "com.timelenses.app";
 
 // Database and Collection IDs
 const DATABASE_ID = "695bd3f2001141d9a3a0"; // Actual TimeLens database ID
@@ -33,6 +37,11 @@ const FUNCTIONS = {
 const client = new Client()
   .setEndpoint(APPWRITE_ENDPOINT)
   .setProject(APPWRITE_PROJECT_ID);
+
+// Set platform-specific bundle ID for iOS
+if (Platform.OS === "ios") {
+  client.setPlatform(IOS_BUNDLE_ID);
+}
 
 const account = new Account(client);
 const databases = new Databases(client);

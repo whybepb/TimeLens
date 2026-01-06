@@ -17,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useEffect } from "react";
 import {
+  AICoachCard,
   CircularProgress,
   CoachInsightCard,
   DashboardHeader,
@@ -125,7 +126,7 @@ export default function Dashboard() {
             <View className="flex-row items-center justify-between mb-3">
               <View className="flex-row items-center gap-2">
                 <Target size={18} color="#1AA0FF" />
-                <Text className="text-white font-semibold">Today's Goals</Text>
+                <Text className="text-white font-semibold">Todays Goals</Text>
               </View>
               <View className="flex-row items-center gap-1">
                 <Text className="text-charcoal-400 text-sm">
@@ -188,10 +189,11 @@ export default function Dashboard() {
               />
             </View>
 
-            {/* Coach Insight Card - Strategy Pattern based advice */}
-            <CoachInsightCard
-              insight={advice.message}
-              actionText={advice.actionLabel}
+            {/* AI Coach Card - LLM-powered personalized advice */}
+            <AICoachCard
+              onActionPress={(action) => {
+                Alert.alert("Action", action);
+              }}
             />
 
             {/* View Stats Button */}

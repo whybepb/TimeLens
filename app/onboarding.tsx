@@ -12,10 +12,12 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import type { PermissionStatus } from "../src/components";
 import { PermissionCard } from "../src/components";
 import { getDataManager, getHealthService } from "../src/services";
+import { ONBOARDING_COMPLETE_KEY } from "./index";
 
 interface PermissionState {
   health: PermissionStatus;
@@ -48,12 +50,21 @@ export default function OnboardingScreen() {
     });
   }, [permissions, progressValue]);
 
-  // Navigate to dashboard when all permissions granted
+  // Navigate to dashboard when all permissions granted and save completion status
   useEffect(() => {
     if (allGranted) {
-      const timer = setTimeout(() => {
+      const completeOnboarding = async () => {
+        try {
+          // Save that onboarding is complete
+          await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+          console.log("[Onboarding] Saved completion status");
+        } catch (error) {
+          console.error("[Onboarding] Failed to save completion status:", error);
+        }
         router.replace("/dashboard" as const);
-      }, 1000);
+      };
+      
+      const timer = setTimeout(completeOnboarding, 1000);
       return () => clearTimeout(timer);
     }
   }, [allGranted]);
@@ -261,7 +272,11 @@ export default function OnboardingScreen() {
             <Animated.View entering={FadeIn.delay(800).duration(400)} className="mt-8 items-center">
               <Text
                 className="text-white/40 text-sm underline"
-                onPress={() => router.replace("/dashboard" as const)}
+                onPress={async () => {
+                  // Save onboarding as complete even when skipping
+                  await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+                  router.replace("/dashboard" as const);
+                }}
               >
                 Skip for now
               </Text>

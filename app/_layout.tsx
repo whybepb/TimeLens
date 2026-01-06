@@ -1,11 +1,12 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, AppState, View } from "react-native";
 import "../global.css";
 import { ShieldOverlay } from "../src/components";
 import { AuthProvider, useAuth } from "../src/contexts";
 import { useShield } from "../src/hooks";
+import { getDataManager } from "../src/services/DataManager";
 
 function RootLayoutNav() {
   const { isActive, currentApp, proceed, returnToFocus } = useShield();
@@ -30,6 +31,24 @@ function RootLayoutNav() {
       router.replace("/dashboard");
     }
   }, [isAuthenticated, isLoading, segments]);
+
+  // Handle app foreground - refresh health data
+  useEffect(() => {
+    const dataManager = getDataManager();
+
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
+        console.log("[App] App came to foreground, refreshing health data...");
+        dataManager.refreshData().catch((error) => {
+          console.error("[App] Failed to refresh data on foreground:", error);
+        });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   // Show loading screen while checking auth
   if (isLoading) {

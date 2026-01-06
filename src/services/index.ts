@@ -34,3 +34,6 @@ export type { GoalProgress, GoalType, Goal as UserGoal, UserGoals } from "./Goal
 export { default as StreakService, getStreakService } from "./StreakService";
 export type { DailyLog, Streak, StreakData, StreakType } from "./StreakService";
 
+export { default as LLMService, getLLMService } from "./LLMService";
+export type { CoachingContext, LLMProvider, LLMResponse } from "./LLMService";
+

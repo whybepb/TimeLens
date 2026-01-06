@@ -1,3 +1,4 @@
+export { AICoachCard } from "./AICoachCard";
 export { CalendarHeatmap } from "./CalendarHeatmap";
 export { CircularProgress } from "./CircularProgress";
 export { CoachInsightCard } from "./CoachInsightCard";
