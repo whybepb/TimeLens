@@ -306,8 +306,41 @@ class DataManager {
         });
       }
 
-      // TODO: Implement DeviceActivity data fetch for screen time
-      // Screen Time API requires paid developer account
+      // Update streaks based on current progress
+      const { getGoalService } = await import('./GoalService');
+      const goalService = getGoalService();
+      const currentStats = this.getUserStats();
+      const pvcResult = this.calculatePVC();
+
+      await goalService.updateStreaksFromProgress({
+        steps: currentStats.steps,
+        sleepHours: currentStats.sleepHours,
+        focusMinutes: currentStats.focusTimeMinutes,
+        pvcScore: pvcResult.score,
+        activeCalories: currentStats.activeCalories,
+      });
+
+      // Save daily log for historical tracking
+      const { getStreakService } = await import('./StreakService');
+      const streakService = getStreakService();
+      const completedGoals = goalService.countCompletedGoals({
+        steps: currentStats.steps,
+        sleepHours: currentStats.sleepHours,
+        focusMinutes: currentStats.focusTimeMinutes,
+        pvcScore: pvcResult.score,
+        activeCalories: currentStats.activeCalories,
+      });
+
+      await streakService.saveDailyLog({
+        steps: currentStats.steps,
+        sleepHours: currentStats.sleepHours,
+        focusMinutes: currentStats.focusTimeMinutes,
+        pvcScore: Math.round(pvcResult.score), // Must be integer for Appwrite
+        activeCalories: currentStats.activeCalories,
+        goalsMetCount: completedGoals,
+      });
+
+      console.log('[DataManager] Streaks and daily log updated');
 
     } catch (error) {
       console.error('[DataManager] Error refreshing data:', error);

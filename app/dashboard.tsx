@@ -1,3 +1,8 @@
+/**
+ * Dashboard - Main app screen
+ * Premium glassmorphic design with animated background
+ */
+
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
@@ -10,24 +15,25 @@ import {
   Shield,
   Smartphone,
   Target,
-  Wifi,
 } from "lucide-react-native";
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useEffect } from "react";
 import {
   AICoachCard,
+  AnimatedBackground,
   CircularProgress,
-  CoachInsightCard,
   DashboardHeader,
   DataCard,
+  GlassButton,
   ProgressRings,
   StreakBadge,
 } from "../src/components";
 import { useAuth } from "../src/contexts";
 import { useCoachAdvice, useGoals, useProductivityData, useShield, useStreaks } from "../src/hooks";
-import { getAppwriteService, getGoalService, getStreakService } from "../src/services";
+import { getGoalService, getStreakService } from "../src/services";
 
 // Helper to format minutes to hours and minutes string
 const formatMinutes = (minutes: number): string => {
@@ -61,25 +67,28 @@ export default function Dashboard() {
   // Use the coach advice hook - Strategy Pattern based recommendations
   const advice = useCoachAdvice();
 
-  // Shield demo trigger
-  const { demoTrigger } = useShield();
-
   // Goals and streaks
   const { progress, completedCount, totalGoals } = useGoals();
   const { overallStreak } = useStreaks();
 
+  // Shield demo trigger
+  const { demoTrigger } = useShield();
+
   return (
-    <View className="flex-1 bg-charcoal-900">
-      {/* Radial gradient background */}
+    <View className="flex-1 bg-charcoal-950">
+      {/* Animated gradient orbs background */}
+      <AnimatedBackground preset="default" intensity="medium" />
+
+      {/* Top gradient overlay for depth */}
       <LinearGradient
         colors={[
-          "rgba(26, 160, 255, 0.08)",
-          "rgba(164, 89, 255, 0.05)",
+          "rgba(13, 13, 15, 0.3)",
           "transparent",
         ]}
         start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 0.6 }}
-        className="absolute top-0 left-0 right-0 h-96"
+        end={{ x: 0.5, y: 0.3 }}
+        className="absolute top-0 left-0 right-0 h-40"
+        pointerEvents="none"
       />
 
       <SafeAreaView className="flex-1">
@@ -91,12 +100,15 @@ export default function Dashboard() {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={refresh}
-              tintColor="#1AA0FF"
+              tintColor="#A459FF"
             />
           }
         >
           {/* Header with Streak Badge */}
-          <View className="flex-row items-center justify-between px-6 py-4">
+          <Animated.View
+            entering={FadeInDown.duration(400)}
+            className="flex-row items-center justify-between px-6 py-4"
+          >
             <DashboardHeader
               userName={user?.name || "Explorer"}
               onSettingsPress={() => Alert.alert("Settings", "Settings screen coming soon!")}
@@ -110,50 +122,62 @@ export default function Dashboard() {
               size="md"
               showLongest={false}
             />
-          </View>
+          </Animated.View>
 
           {/* PVC Hero Section */}
-          <View className="items-center justify-center py-6">
+          <Animated.View
+            entering={FadeInDown.delay(100).duration(500)}
+            className="items-center justify-center py-8"
+          >
             <CircularProgress progress={pvc.score} />
-          </View>
+          </Animated.View>
 
           {/* Goals Progress Mini Display */}
-          <TouchableOpacity
-            onPress={() => router.push("/stats")}
-            className="mx-6 mb-4 bg-charcoal-800/50 rounded-2xl p-4 border border-charcoal-700"
-            activeOpacity={0.7}
-          >
-            <View className="flex-row items-center justify-between mb-3">
-              <View className="flex-row items-center gap-2">
-                <Target size={18} color="#1AA0FF" />
-                <Text className="text-white font-semibold">Todays Goals</Text>
-              </View>
-              <View className="flex-row items-center gap-1">
-                <Text className="text-charcoal-400 text-sm">
-                  {completedCount}/{totalGoals}
+          <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+            <TouchableOpacity
+              onPress={() => router.push("/stats")}
+              className="mx-6 mb-5"
+              activeOpacity={0.8}
+            >
+              <View className="bg-white/[0.06] rounded-3xl p-5 border border-white/[0.1]">
+                <View className="flex-row items-center justify-between mb-4">
+                  <View className="flex-row items-center gap-2">
+                    <View className="w-8 h-8 rounded-xl bg-electric-400/20 items-center justify-center">
+                      <Target size={16} color="#1AA0FF" />
+                    </View>
+                    <Text className="text-white font-semibold">Today's Goals</Text>
+                  </View>
+                  <View className="flex-row items-center gap-2 bg-white/[0.08] px-3 py-1.5 rounded-full">
+                    <Text className="text-white/70 text-sm font-medium">
+                      {completedCount}/{totalGoals}
+                    </Text>
+                    <ChartBar size={14} color="rgba(255,255,255,0.5)" />
+                  </View>
+                </View>
+                <ProgressRings goals={progress} size={130} strokeWidth={7} showLegend={false} />
+                <Text className="text-center text-white/40 text-xs mt-3 font-medium">
+                  Tap for detailed stats →
                 </Text>
-                <ChartBar size={16} color="#888" />
               </View>
-            </View>
-            <ProgressRings goals={progress} size={120} strokeWidth={6} showLegend={false} />
-            <Text className="text-center text-charcoal-500 text-xs mt-2">
-              Tap to see detailed stats →
-            </Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </Animated.View>
 
           {/* Data Grid */}
-          <View className="px-6">
+          <Animated.View
+            entering={FadeInDown.delay(300).duration(400)}
+            className="px-6"
+          >
             {/* 2x2 Grid */}
-            <View className="flex-row gap-3 mb-3">
+            <View className="flex-row gap-3 mb-4">
               {/* Body Card */}
               <DataCard
                 title="Body"
                 titleIcon={Heart}
-                titleIconColor="#FF6B6B"
+                titleIconColor="#FB7185"
                 items={[
                   {
                     icon: Footprints,
-                    iconColor: "#00E676",
+                    iconColor: "#34D399",
                     label: "Steps",
                     value: formatNumber(stats.steps),
                   },
@@ -171,17 +195,17 @@ export default function Dashboard() {
               <DataCard
                 title="Digital"
                 titleIcon={Smartphone}
-                titleIconColor="#1AA0FF"
+                titleIconColor="#22D3EE"
                 items={[
                   {
                     icon: Focus,
-                    iconColor: "#00E676",
+                    iconColor: "#34D399",
                     label: "Focus Time",
                     value: formatMinutes(stats.focusTimeMinutes),
                   },
                   {
                     icon: Hand,
-                    iconColor: "#FFAB00",
+                    iconColor: "#FBBF24",
                     label: "Pickups",
                     value: formatNumber(stats.pickups),
                   },
@@ -190,64 +214,44 @@ export default function Dashboard() {
             </View>
 
             {/* AI Coach Card - LLM-powered personalized advice */}
-            <AICoachCard
-              onActionPress={(action) => {
-                Alert.alert("Action", action);
-              }}
-            />
+            <Animated.View entering={FadeInDown.delay(400).duration(400)}>
+              <AICoachCard
+                onActionPress={(action) => {
+                  Alert.alert("Action", action);
+                }}
+              />
+            </Animated.View>
 
             {/* View Stats Button */}
-            <TouchableOpacity
-              onPress={() => router.push("/stats")}
-              className="mt-4 flex-row items-center justify-center gap-2 bg-electric-primary/20 border border-electric-primary/40 rounded-xl py-3 px-4"
-              activeOpacity={0.7}
+            <Animated.View
+              entering={FadeInDown.delay(500).duration(400)}
+              className="mt-5"
             >
-              <ChartBar size={18} color="#1AA0FF" />
-              <Text className="text-electric-primary font-medium text-sm">
-                View Statistics & Goals
-              </Text>
-            </TouchableOpacity>
+              <GlassButton
+                title="View Statistics & Goals"
+                onPress={() => router.push("/stats")}
+                variant="secondary"
+                icon={ChartBar}
+                fullWidth
+              />
+            </Animated.View>
 
-            {/* Demo: Test Shield Overlay */}
-            <TouchableOpacity
-              onPress={() => demoTrigger("Instagram")}
-              className="mt-3 flex-row items-center justify-center gap-2 bg-violet-500/20 border border-violet-500/40 rounded-xl py-3 px-4"
-              activeOpacity={0.7}
+            {/* Focus Shield Demo - v0 feature preview */}
+            <Animated.View
+              entering={FadeInDown.delay(600).duration(400)}
+              className="mt-3"
             >
-              <Shield size={18} color="#A459FF" />
-              <Text className="text-violet-400 font-medium text-sm">
-                Demo: Test Focus Shield
-              </Text>
-            </TouchableOpacity>
-
-            {/* Test Appwrite Connection */}
-            <TouchableOpacity
-              onPress={async () => {
-                try {
-                  const appwrite = getAppwriteService();
-                  const connected = await appwrite.ping();
-                  Alert.alert(
-                    connected ? "✅ Success" : "❌ Failed",
-                    connected
-                      ? "Appwrite connection successful!"
-                      : "Could not connect to Appwrite"
-                  );
-                } catch (error: any) {
-                  Alert.alert("❌ Error", error.message || "Connection failed");
-                }
-              }}
-              className="mt-3 flex-row items-center justify-center gap-2 bg-cyan-500/20 border border-cyan-500/40 rounded-xl py-3 px-4"
-              activeOpacity={0.7}
-            >
-              <Wifi size={18} color="#00D9FF" />
-              <Text className="text-cyan-400 font-medium text-sm">
-                Send a Ping to Appwrite
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <GlassButton
+                title="Try Focus Shield"
+                onPress={() => demoTrigger("Instagram")}
+                variant="ghost"
+                icon={Shield}
+                fullWidth
+              />
+            </Animated.View>
+          </Animated.View>
         </ScrollView>
       </SafeAreaView>
     </View>
   );
 }
-

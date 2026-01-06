@@ -122,10 +122,9 @@ export function ProgressRings({
 
                 {/* Center content */}
                 <View className="absolute inset-0 items-center justify-center">
-                    <Text className="text-white font-bold text-2xl">
+                    <Text className="text-white font-bold text-xl">
                         {displayGoals.filter((g) => g.isCompleted).length}/{displayGoals.length}
                     </Text>
-                    <Text className="text-charcoal-400 text-xs">goals met</Text>
                 </View>
             </View>
 

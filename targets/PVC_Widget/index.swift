@@ -71,7 +71,53 @@ struct PVCWidgetEntryView: View {
     }
     
     var body: some View {
-        ZStack {
+        VStack(spacing: 8) {
+            // Score Circle
+            ZStack {
+                Circle()
+                    .stroke(Color.white.opacity(0.1), lineWidth: 6)
+                    .frame(width: 70, height: 70)
+                
+                Circle()
+                    .trim(from: 0, to: CGFloat(entry.data.score) / 100)
+                    .stroke(
+                        LinearGradient(
+                            colors: [scoreColor, scoreColor.opacity(0.7)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                    .frame(width: 70, height: 70)
+                    .rotationEffect(.degrees(-90))
+                
+                VStack(spacing: 0) {
+                    Text("\(entry.data.score)")
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text("PVC")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.5))
+                }
+            }
+            
+            // Level Label
+            Text(entry.data.level)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.white.opacity(0.7))
+                .lineLimit(1)
+            
+            // Mini Stats (for medium/large widgets)
+            if family != .systemSmall {
+                HStack(spacing: 16) {
+                    StatItem(icon: "figure.walk", value: "\(entry.data.stepsToday)", label: "Steps")
+                    StatItem(icon: "brain.head.profile", value: "\(entry.data.focusMinutes)m", label: "Focus")
+                }
+                .padding(.top, 4)
+            }
+        }
+        .padding()
+        .containerBackground(for: .widget) {
             // Background gradient
             LinearGradient(
                 gradient: Gradient(colors: [
@@ -81,53 +127,6 @@ struct PVCWidgetEntryView: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            
-            VStack(spacing: 8) {
-                // Score Circle
-                ZStack {
-                    Circle()
-                        .stroke(Color.white.opacity(0.1), lineWidth: 6)
-                        .frame(width: 70, height: 70)
-                    
-                    Circle()
-                        .trim(from: 0, to: CGFloat(entry.data.score) / 100)
-                        .stroke(
-                            LinearGradient(
-                                colors: [scoreColor, scoreColor.opacity(0.7)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                        )
-                        .frame(width: 70, height: 70)
-                        .rotationEffect(.degrees(-90))
-                    
-                    VStack(spacing: 0) {
-                        Text("\(entry.data.score)")
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                        Text("PVC")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.white.opacity(0.5))
-                    }
-                }
-                
-                // Level Label
-                Text(entry.data.level)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.7))
-                    .lineLimit(1)
-                
-                // Mini Stats (for medium/large widgets)
-                if family != .systemSmall {
-                    HStack(spacing: 16) {
-                        StatItem(icon: "figure.walk", value: "\(entry.data.stepsToday)", label: "Steps")
-                        StatItem(icon: "brain.head.profile", value: "\(entry.data.focusMinutes)m", label: "Focus")
-                    }
-                    .padding(.top, 4)
-                }
-            }
-            .padding()
         }
     }
 }

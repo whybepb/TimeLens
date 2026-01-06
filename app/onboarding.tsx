@@ -1,10 +1,18 @@
+/**
+ * Onboarding Screen - Permission Setup
+ * Premium glassmorphic design with animated permission cards
+ */
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Bell, Heart, Shield, Sparkles } from "lucide-react-native";
+import { Bell, Check, Heart, Shield, Sparkles } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { Alert, Platform, ScrollView, Text, View } from "react-native";
 import Animated, {
   FadeIn,
+  FadeInDown,
   FadeOut,
   SlideInRight,
   useAnimatedStyle,
@@ -12,10 +20,9 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import type { PermissionStatus } from "../src/components";
-import { PermissionCard } from "../src/components";
+import { AnimatedBackground, GlassButton } from "../src/components";
 import { getDataManager, getHealthService } from "../src/services";
 import { ONBOARDING_COMPLETE_KEY } from "./index";
 
@@ -24,6 +31,136 @@ interface PermissionState {
   screenTime: PermissionStatus;
   notifications: PermissionStatus;
 }
+
+interface PermissionCardProps {
+  icon: React.ElementType;
+  iconColor: string;
+  title: string;
+  description: string;
+  status: PermissionStatus;
+  onEnable: () => void;
+  delay?: number;
+}
+
+const PermissionCard: React.FC<PermissionCardProps> = ({
+  icon: Icon,
+  iconColor,
+  title,
+  description,
+  status,
+  onEnable,
+  delay = 0,
+}) => {
+  const scale = useSharedValue(1);
+  const isGranted = status === "granted";
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    if (!isGranted) {
+      scale.value = withSpring(0.98, { damping: 15, stiffness: 300 });
+    }
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+  };
+
+  return (
+    <Animated.View
+      entering={SlideInRight.delay(delay).duration(400).springify()}
+      style={animatedStyle}
+      onTouchStart={handlePressIn}
+      onTouchEnd={handlePressOut}
+    >
+      <View
+        style={{
+          marginBottom: 16,
+          borderRadius: 24,
+          overflow: "hidden",
+          borderWidth: 1,
+          borderColor: isGranted
+            ? "rgba(52, 211, 153, 0.3)"
+            : "rgba(255, 255, 255, 0.12)",
+        }}
+      >
+        {/* Blur background */}
+        {Platform.OS === "ios" && (
+          <BlurView
+            intensity={25}
+            tint="dark"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
+        )}
+
+        {/* Background */}
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: isGranted
+              ? "rgba(52, 211, 153, 0.08)"
+              : "rgba(255, 255, 255, 0.06)",
+          }}
+        />
+
+        {/* Content */}
+        <View style={{ padding: 20, flexDirection: "row", alignItems: "center" }}>
+          {/* Icon */}
+          <View
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 16,
+              backgroundColor: `${iconColor}20`,
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 16,
+            }}
+          >
+            {isGranted ? (
+              <Check size={24} color="#34D399" />
+            ) : (
+              <Icon size={24} color={iconColor} />
+            )}
+          </View>
+
+          {/* Text */}
+          <View style={{ flex: 1 }}>
+            <Text className="text-white font-semibold text-base mb-1">
+              {title}
+            </Text>
+            <Text className="text-white/50 text-sm leading-5">
+              {description}
+            </Text>
+          </View>
+
+          {/* Enable button */}
+          {!isGranted && (
+            <GlassButton
+              title={status === "loading" ? "" : "Enable"}
+              onPress={onEnable}
+              variant="primary"
+              size="sm"
+              loading={status === "loading"}
+            />
+          )}
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
 
 export default function OnboardingScreen() {
   const [permissions, setPermissions] = useState<PermissionState>({
@@ -38,24 +175,21 @@ export default function OnboardingScreen() {
     permissions.notifications === "granted";
 
   const progressValue = useSharedValue(0);
+  const grantedCount = Object.values(permissions).filter((s) => s === "granted").length;
 
   // Update progress based on granted permissions
   useEffect(() => {
-    const grantedCount = Object.values(permissions).filter(
-      (s) => s === "granted"
-    ).length;
     progressValue.value = withSpring(grantedCount / 3, {
       damping: 15,
       stiffness: 100,
     });
   }, [permissions, progressValue]);
 
-  // Navigate to dashboard when all permissions granted and save completion status
+  // Navigate to dashboard when all permissions granted
   useEffect(() => {
     if (allGranted) {
       const completeOnboarding = async () => {
         try {
-          // Save that onboarding is complete
           await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
           console.log("[Onboarding] Saved completion status");
         } catch (error) {
@@ -63,17 +197,15 @@ export default function OnboardingScreen() {
         }
         router.replace("/dashboard" as const);
       };
-      
-      const timer = setTimeout(completeOnboarding, 1000);
+
+      const timer = setTimeout(completeOnboarding, 1200);
       return () => clearTimeout(timer);
     }
   }, [allGranted]);
 
-  const progressBarStyle = useAnimatedStyle(() => {
-    return {
-      width: `${progressValue.value * 100}%`,
-    };
-  });
+  const progressBarStyle = useAnimatedStyle(() => ({
+    width: `${progressValue.value * 100}%`,
+  }));
 
   // Request REAL HealthKit permission
   const requestHealthPermission = async () => {
@@ -81,8 +213,6 @@ export default function OnboardingScreen() {
 
     try {
       const healthService = getHealthService();
-
-      // Check if HealthKit is available
       const isAvailable = await healthService.isAvailable();
 
       if (!isAvailable) {
@@ -95,11 +225,9 @@ export default function OnboardingScreen() {
         return;
       }
 
-      // Request actual HealthKit permissions
       const status = await healthService.requestPermissions();
 
       if (status === "granted") {
-        // Fetch initial health data
         const dataManager = getDataManager();
         await dataManager.refreshData();
         setPermissions((prev) => ({ ...prev, health: "granted" }));
@@ -120,61 +248,32 @@ export default function OnboardingScreen() {
     }
   };
 
-  // Screen Time permission (requires paid developer account)
-  // For now, auto-grant with demo data
+  // Screen Time permission (placeholder)
   const requestScreenTimePermission = async () => {
     setPermissions((prev) => ({ ...prev, screenTime: "loading" }));
 
-    // Note: DeviceActivity API requires Family Controls entitlement
-    // which is only available with a paid Apple Developer account ($99/year)
-
-    // Show info alert
     Alert.alert(
       "Screen Time Access",
       "Screen Time API requires a paid Apple Developer account. Using demo data for now.",
       [{ text: "OK" }]
     );
 
-    // Simulate a short delay then grant
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 800));
     setPermissions((prev) => ({ ...prev, screenTime: "granted" }));
   };
 
-  // Notification permission using expo-notifications
+  // Notification permission (placeholder)
   const requestNotificationPermission = async () => {
     setPermissions((prev) => ({ ...prev, notifications: "loading" }));
 
-    try {
-      // For now, simulate permission grant
-      // TODO: Implement with expo-notifications when needed
-      // import * as Notifications from 'expo-notifications';
-      // const { status } = await Notifications.requestPermissionsAsync();
-      // setPermissions((prev) => ({
-      //   ...prev,
-      //   notifications: status === 'granted' ? "granted" : "denied",
-      // }));
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setPermissions((prev) => ({ ...prev, notifications: "granted" }));
-    } catch (error) {
-      console.error("[Onboarding] Notification error:", error);
-      setPermissions((prev) => ({ ...prev, notifications: "denied" }));
-    }
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    setPermissions((prev) => ({ ...prev, notifications: "granted" }));
   };
 
   return (
-    <View className="flex-1 bg-charcoal-900">
-      {/* Radial gradient background */}
-      <LinearGradient
-        colors={[
-          "rgba(164, 89, 255, 0.12)",
-          "rgba(26, 160, 255, 0.08)",
-          "transparent",
-        ]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 0.7 }}
-        className="absolute top-0 left-0 right-0 h-96"
-      />
+    <View className="flex-1 bg-charcoal-950">
+      {/* Animated background */}
+      <AnimatedBackground preset="violet" intensity="medium" />
 
       <SafeAreaView className="flex-1">
         <ScrollView
@@ -183,84 +282,119 @@ export default function OnboardingScreen() {
           contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 24 }}
         >
           {/* Header */}
-          <Animated.View
-            entering={FadeIn.duration(600)}
-            className="items-center pt-8 pb-6"
-          >
-            <View className="w-20 h-20 rounded-full bg-violet-500/20 items-center justify-center mb-6">
-              <Sparkles size={40} color="#A459FF" />
+          <Animated.View entering={FadeIn.duration(600)} className="items-center pt-8 pb-8">
+            <View
+              style={{
+                width: 88,
+                height: 88,
+                borderRadius: 32,
+                overflow: "hidden",
+                marginBottom: 24,
+              }}
+            >
+              {Platform.OS === "ios" && (
+                <BlurView
+                  intensity={40}
+                  tint="dark"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  }}
+                />
+              )}
+              <LinearGradient
+                colors={["rgba(164, 89, 255, 0.35)", "rgba(26, 160, 255, 0.2)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: 1,
+                  borderColor: "rgba(255, 255, 255, 0.2)",
+                  borderRadius: 32,
+                }}
+              >
+                <Sparkles size={40} color="#A459FF" />
+              </LinearGradient>
             </View>
-            <Text className="text-white text-3xl font-bold mb-2">
+            <Text className="text-white text-3xl font-bold mb-3 tracking-tight">
               Welcome to TimeLens
             </Text>
-            <Text className="text-white/60 text-center text-base leading-6">
-              To calculate your Productivity-Vitality Score, we need a few permissions.
+            <Text className="text-white/50 text-center text-base leading-6 px-4">
+              Grant permissions to unlock your full productivity potential
             </Text>
           </Animated.View>
 
           {/* Progress Bar */}
-          <View className="mb-8">
-            <View className="h-2 bg-white/10 rounded-full overflow-hidden">
-              <Animated.View
-                style={progressBarStyle}
-                className="h-full bg-gradient-to-r from-electric-400 to-violet-500 rounded-full"
-              >
+          <Animated.View entering={FadeInDown.delay(200).duration(400)} className="mb-8">
+            <View className="h-2 bg-white/[0.08] rounded-full overflow-hidden">
+              <Animated.View style={[progressBarStyle, { height: "100%" }]}>
                 <LinearGradient
-                  colors={["#1AA0FF", "#A459FF"]}
+                  colors={["#34D399", "#06B6D4"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
-                  className="h-full w-full"
+                  style={{ height: "100%", borderRadius: 8 }}
                 />
               </Animated.View>
             </View>
-            <Text className="text-white/40 text-xs text-center mt-2">
-              {Object.values(permissions).filter((s) => s === "granted").length} of 3 permissions granted
+            <Text className="text-white/40 text-xs text-center mt-3 font-medium">
+              {grantedCount} of 3 permissions granted
             </Text>
-          </View>
+          </Animated.View>
 
           {/* Permission Cards */}
-          <Animated.View entering={SlideInRight.delay(200).duration(400)}>
-            <PermissionCard
-              icon={Heart}
-              iconColor="#FF6B6B"
-              title="Body Sync"
-              description="Access your health data including steps, sleep, and active calories from Apple Health."
-              status={permissions.health}
-              onEnable={requestHealthPermission}
-            />
-          </Animated.View>
+          <PermissionCard
+            icon={Heart}
+            iconColor="#FB7185"
+            title="Body Sync"
+            description="Access steps, sleep, and calories from Apple Health."
+            status={permissions.health}
+            onEnable={requestHealthPermission}
+            delay={300}
+          />
 
-          <Animated.View entering={SlideInRight.delay(400).duration(400)}>
-            <PermissionCard
-              icon={Shield}
-              iconColor="#1AA0FF"
-              title="Focus Shield"
-              description="Monitor screen time and app usage to calculate your digital wellness score."
-              status={permissions.screenTime}
-              onEnable={requestScreenTimePermission}
-            />
-          </Animated.View>
+          <PermissionCard
+            icon={Shield}
+            iconColor="#22D3EE"
+            title="Focus Shield"
+            description="Monitor screen time and app usage for wellness insights."
+            status={permissions.screenTime}
+            onEnable={requestScreenTimePermission}
+            delay={450}
+          />
 
-          <Animated.View entering={SlideInRight.delay(600).duration(400)}>
-            <PermissionCard
-              icon={Bell}
-              iconColor="#A459FF"
-              title="Proactive Alerts"
-              description="Receive timely insights and reminders to maintain your productivity flow."
-              status={permissions.notifications}
-              onEnable={requestNotificationPermission}
-            />
-          </Animated.View>
+          <PermissionCard
+            icon={Bell}
+            iconColor="#A459FF"
+            title="Proactive Alerts"
+            description="Receive timely insights to maintain your productivity."
+            status={permissions.notifications}
+            onEnable={requestNotificationPermission}
+            delay={600}
+          />
 
           {/* All Granted Message */}
           {allGranted && (
             <Animated.View
               entering={FadeIn.duration(400)}
               exiting={FadeOut.duration(200)}
-              className="mt-6 items-center"
+              className="mt-4 items-center"
             >
-              <View className="bg-green-500/20 border border-green-500/40 rounded-2xl px-6 py-4">
-                <Text className="text-green-400 text-center font-semibold">
+              <View
+                style={{
+                  backgroundColor: "rgba(52, 211, 153, 0.15)",
+                  borderWidth: 1,
+                  borderColor: "rgba(52, 211, 153, 0.3)",
+                  borderRadius: 20,
+                  paddingHorizontal: 24,
+                  paddingVertical: 16,
+                }}
+              >
+                <Text className="text-emerald-400 text-center font-semibold">
                   🎉 All set! Launching your dashboard...
                 </Text>
               </View>
@@ -269,11 +403,10 @@ export default function OnboardingScreen() {
 
           {/* Skip Option */}
           {!allGranted && (
-            <Animated.View entering={FadeIn.delay(800).duration(400)} className="mt-8 items-center">
+            <Animated.View entering={FadeIn.delay(800).duration(400)} className="mt-6 items-center">
               <Text
-                className="text-white/40 text-sm underline"
+                className="text-white/30 text-sm"
                 onPress={async () => {
-                  // Save onboarding as complete even when skipping
                   await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
                   router.replace("/dashboard" as const);
                 }}

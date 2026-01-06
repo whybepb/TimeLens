@@ -1,9 +1,11 @@
 export { AICoachCard } from "./AICoachCard";
+export { AnimatedBackground } from "./AnimatedBackground";
 export { CalendarHeatmap } from "./CalendarHeatmap";
 export { CircularProgress } from "./CircularProgress";
 export { CoachInsightCard } from "./CoachInsightCard";
 export { DashboardHeader } from "./DashboardHeader";
 export { DataCard } from "./DataCard";
+export { GlassButton } from "./GlassButton";
 export { GlassCard } from "./GlassCard";
 export { GoalCard } from "./GoalCard";
 export { PermissionCard } from "./PermissionCard";

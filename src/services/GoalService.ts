@@ -281,6 +281,42 @@ class GoalService {
   }
 
   /**
+   * Update streaks based on goal progress
+   * Called automatically when stats are refreshed
+   */
+  public async updateStreaksFromProgress(currentStats: {
+    steps: number;
+    sleepHours: number | null;
+    focusMinutes: number;
+    pvcScore: number;
+    activeCalories: number;
+  }): Promise<void> {
+    // Import dynamically to avoid circular dependencies
+    const { getStreakService } = await import("./StreakService");
+    const streakService = getStreakService();
+
+    const progress = this.calculateProgress(currentStats);
+
+    // Update individual goal streaks
+    for (const goal of progress) {
+      // Only track steps, sleep, focus, pvc for streaks (not calories for now)
+      if (goal.type === "calories") continue;
+
+      // Record completion for this goal type
+      await streakService.recordGoalCompletion(
+        goal.type as "steps" | "sleep" | "focus" | "pvc",
+        goal.isCompleted
+      );
+    }
+
+    // Update overall streak
+    const completedCount = progress.filter((p) => p.isCompleted).length;
+    await streakService.updateOverallStreak(completedCount, progress.length);
+
+    console.log(`[GoalService] Updated streaks - ${completedCount}/${progress.length} goals completed`);
+  }
+
+  /**
    * Count how many goals are completed
    */
   public countCompletedGoals(currentStats: {
