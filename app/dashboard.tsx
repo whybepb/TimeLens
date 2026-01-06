@@ -15,6 +15,7 @@ import {
   Shield,
   Smartphone,
   Target,
+  Timer,
 } from "lucide-react-native";
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -239,6 +240,21 @@ export default function Dashboard() {
             {/* Focus Shield Demo - v0 feature preview */}
             <Animated.View
               entering={FadeInDown.delay(600).duration(400)}
+              className="mt-3"
+            >
+              <GlassButton
+                title="Start Focus Session"
+                onPress={() => router.push("/focus")}
+                variant="gradient"
+                gradientColors={["#A459FF", "#7021CC"]}
+                icon={Timer}
+                fullWidth
+              />
+            </Animated.View>
+
+            {/* Shield Demo */}
+            <Animated.View
+              entering={FadeInDown.delay(700).duration(400)}
               className="mt-3"
             >
               <GlassButton

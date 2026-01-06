@@ -37,3 +37,6 @@ export type { DailyLog, Streak, StreakData, StreakType } from "./StreakService";
 export { default as LLMService, getLLMService } from "./LLMService";
 export type { CoachingContext, LLMProvider, LLMResponse } from "./LLMService";
 
+export { default as FocusService, getFocusService } from "./FocusService";
+export type { FocusSession, FocusSettings, FocusStats, SessionType } from "./FocusService";
+

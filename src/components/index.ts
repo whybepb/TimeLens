@@ -5,6 +5,7 @@ export { CircularProgress } from "./CircularProgress";
 export { CoachInsightCard } from "./CoachInsightCard";
 export { DashboardHeader } from "./DashboardHeader";
 export { DataCard } from "./DataCard";
+export { FocusTimer } from "./FocusTimer";
 export { GlassButton } from "./GlassButton";
 export { GlassCard } from "./GlassCard";
 export { GoalCard } from "./GoalCard";
