@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, Alert } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Heart, Shield, Bell, Sparkles } from "lucide-react-native";
+import { Bell, Heart, Shield, Sparkles } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, ScrollView, Text, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
   SlideInRight,
   useAnimatedStyle,
-  withSpring,
   useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { PermissionCard } from "../src/components";
 import type { PermissionStatus } from "../src/components";
-import { getHealthService, getDataManager } from "../src/services";
+import { PermissionCard } from "../src/components";
+import { getDataManager, getHealthService } from "../src/services";
 
 interface PermissionState {
   health: PermissionStatus;
@@ -67,13 +67,13 @@ export default function OnboardingScreen() {
   // Request REAL HealthKit permission
   const requestHealthPermission = async () => {
     setPermissions((prev) => ({ ...prev, health: "loading" }));
-    
+
     try {
       const healthService = getHealthService();
-      
+
       // Check if HealthKit is available
       const isAvailable = await healthService.isAvailable();
-      
+
       if (!isAvailable) {
         Alert.alert(
           "HealthKit Unavailable",
@@ -83,10 +83,10 @@ export default function OnboardingScreen() {
         setPermissions((prev) => ({ ...prev, health: "granted" }));
         return;
       }
-      
+
       // Request actual HealthKit permissions
       const status = await healthService.requestPermissions();
-      
+
       if (status === "granted") {
         // Fetch initial health data
         const dataManager = getDataManager();
@@ -113,17 +113,17 @@ export default function OnboardingScreen() {
   // For now, auto-grant with demo data
   const requestScreenTimePermission = async () => {
     setPermissions((prev) => ({ ...prev, screenTime: "loading" }));
-    
+
     // Note: DeviceActivity API requires Family Controls entitlement
     // which is only available with a paid Apple Developer account ($99/year)
-    
+
     // Show info alert
     Alert.alert(
       "Screen Time Access",
       "Screen Time API requires a paid Apple Developer account. Using demo data for now.",
       [{ text: "OK" }]
     );
-    
+
     // Simulate a short delay then grant
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setPermissions((prev) => ({ ...prev, screenTime: "granted" }));
@@ -132,7 +132,7 @@ export default function OnboardingScreen() {
   // Notification permission using expo-notifications
   const requestNotificationPermission = async () => {
     setPermissions((prev) => ({ ...prev, notifications: "loading" }));
-    
+
     try {
       // For now, simulate permission grant
       // TODO: Implement with expo-notifications when needed

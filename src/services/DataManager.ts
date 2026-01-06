@@ -4,8 +4,8 @@
  * Uses the Singleton Pattern for centralized state management
  */
 
-import { syncWidgetWithStats } from "./WidgetService";
 import { getHealthService, HealthData } from "./HealthService";
+import { syncWidgetWithStats } from "./WidgetService";
 
 // Types for user statistics
 export interface UserStats {
@@ -13,13 +13,13 @@ export interface UserStats {
   steps: number;
   sleepHours: number;
   activeCalories: number;
-  
+
   // Screen Time Data (from DeviceActivity API)
   focusTimeMinutes: number;      // Deep work / focus time
   socialMediaMinutes: number;    // Social media usage
   totalScreenTimeMinutes: number;
   pickups: number;
-  
+
   // Timestamps
   lastUpdated: Date;
 }
@@ -69,14 +69,14 @@ class DataManager {
       steps: 6234,
       sleepHours: 7.2,
       activeCalories: 320,
-      
+
       // Dummy screen time data
       // TODO: Fetch from DeviceActivity Framework API (iOS 15+)
       focusTimeMinutes: 165,        // 2h 45m of focus/deep work
       socialMediaMinutes: 45,       // 45 mins social media
       totalScreenTimeMinutes: 280,  // ~4.5 hours total
       pickups: 42,
-      
+
       lastUpdated: new Date(),
     };
   }
@@ -150,7 +150,7 @@ class DataManager {
    */
   public subscribe(callback: Subscriber): () => void {
     this.subscribers.add(callback);
-    
+
     // Immediately call with current data
     callback(this.getUserStats(), this.calculatePVC());
 
@@ -167,7 +167,7 @@ class DataManager {
     const stats = this.getUserStats();
     const pvc = this.calculatePVC();
     this.subscribers.forEach((callback) => callback(stats, pvc));
-    
+
     // Sync data with iOS widget
     this.syncToWidget(stats, pvc);
   }
@@ -191,23 +191,23 @@ class DataManager {
    */
   public async refreshData(): Promise<void> {
     console.log('[DataManager] Refreshing data...');
-    
+
     try {
       // Fetch real HealthKit data
       const healthService = getHealthService();
       const permissionStatus = healthService.getPermissionStatus();
-      
+
       if (permissionStatus === 'granted') {
         console.log('[DataManager] Fetching real HealthKit data...');
         const healthData: HealthData = await healthService.getAllHealthData();
-        
+
         // Update stats with real health data
         this.updateStats({
           steps: healthData.steps,
-          sleepHours: healthData.sleepHours,
+          sleepHours: healthData.sleepHours ?? this._userStats.sleepHours,
           activeCalories: healthData.activeCalories,
         });
-        
+
         console.log('[DataManager] Real health data loaded:', healthData);
       } else {
         console.log('[DataManager] HealthKit not authorized, using dummy data');
@@ -218,10 +218,10 @@ class DataManager {
           pickups: currentStats.pickups + Math.floor(Math.random() * 3),
         });
       }
-      
+
       // TODO: Implement DeviceActivity data fetch for screen time
       // Screen Time API requires paid developer account
-      
+
     } catch (error) {
       console.error('[DataManager] Error refreshing data:', error);
     }
@@ -234,12 +234,12 @@ class DataManager {
    */
   public async requestPermissions(): Promise<{ health: boolean; screenTime: boolean }> {
     console.log('[DataManager] Requesting permissions...');
-    
+
     // Request HealthKit permissions
     const healthService = getHealthService();
     const healthStatus = await healthService.requestPermissions();
     const healthGranted = healthStatus === 'granted';
-    
+
     console.log('[DataManager] HealthKit permission:', healthStatus);
 
     // Screen Time / DeviceActivity requires paid developer account

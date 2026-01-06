@@ -1,39 +1,36 @@
-export { getDataManager, default as DataManager } from "./DataManager";
-export type { UserStats, PVCResult } from "./DataManager";
+export { default as DataManager, getDataManager } from "./DataManager";
+export type { PVCResult, UserStats } from "./DataManager";
 
 export {
-  getRecommendationFactory,
-  HighPerformanceStrategy,
-  RecoveryStrategy,
-  BalanceStrategy,
-  default as RecommendationFactory,
+  BalanceStrategy, HighPerformanceStrategy, default as RecommendationFactory, RecoveryStrategy, getRecommendationFactory
 } from "./AdviceEngine";
 export type {
   AdviceStrategy,
   Recommendation,
-  RecommendationIcon,
+  RecommendationIcon
 } from "./AdviceEngine";
 
-export { getShieldService, default as ShieldService } from "./ShieldService";
+export { default as ShieldService, getShieldService } from "./ShieldService";
 export type { BlacklistedApp } from "./ShieldService";
 
 export {
-  updateWidgetData,
-  reloadWidgetTimeline,
-  syncWidgetWithStats,
-  default as WidgetService,
+  default as WidgetService, reloadWidgetTimeline,
+  syncWidgetWithStats, updateWidgetData
 } from "./WidgetService";
 export type { WidgetData } from "./WidgetService";
 
-export { getHealthService, default as HealthService } from "./HealthService";
+export { default as HealthService, getHealthService } from "./HealthService";
 export type { HealthData, HealthPermissionStatus } from "./HealthService";
 
-export { getAppwriteService, default as AppwriteService } from "./AppwriteService";
-export type { 
-  AppwriteUser, 
-  UserProfile, 
-  HealthLog, 
-  Goal, 
-  AIInsightRequest, 
-  AIInsightResponse 
+export { default as AppwriteService, getAppwriteService } from "./AppwriteService";
+export type {
+  AIInsightRequest,
+  AIInsightResponse, AppwriteUser, Goal, HealthLog, UserProfile
 } from "./AppwriteService";
+
+export { default as GoalService, getGoalService } from "./GoalService";
+export type { GoalProgress, GoalType, Goal as UserGoal, UserGoals } from "./GoalService";
+
+export { default as StreakService, getStreakService } from "./StreakService";
+export type { DailyLog, Streak, StreakData, StreakType } from "./StreakService";
+

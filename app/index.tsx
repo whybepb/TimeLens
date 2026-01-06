@@ -1,7 +1,6 @@
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { View, ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 const ONBOARDING_COMPLETE_KEY = "@timelens/onboarding_complete";
 
