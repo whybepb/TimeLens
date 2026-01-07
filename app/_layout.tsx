@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { ActivityIndicator, AppState, View } from "react-native";
 import "../global.css";
 import { ShieldOverlay } from "../src/components";
-import { AuthProvider, useAuth } from "../src/contexts";
+import { AuthProvider, ThemeProvider, useAuth } from "../src/contexts";
 import { useShield } from "../src/hooks";
 import { getDataManager } from "../src/services/DataManager";
 
@@ -73,6 +73,7 @@ function RootLayoutNav() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="dashboard" />
         <Stack.Screen name="stats" />
+        <Stack.Screen name="breathe" />
       </Stack>
 
       {/* Focus Shield Overlay - intercepts blacklisted apps */}
@@ -88,9 +89,11 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

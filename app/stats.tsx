@@ -20,6 +20,7 @@ import {
     StreakBadge,
     WeeklyChart,
 } from "../src/components";
+import { useTheme } from "../src/contexts";
 import { useChartData, useGoals, useProductivityData, useStreaks } from "../src/hooks";
 
 type ChartType = "steps" | "sleep" | "focus" | "pvc";
@@ -70,15 +71,16 @@ export default function StatsScreen() {
     const { progress, completedCount, totalGoals, setGoal } = useGoals();
     const { streaks, overallStreak } = useStreaks();
     const { weeklyData, monthlyHeatmap, averages } = useChartData();
+    const { currentTheme } = useTheme();
 
     const [selectedChart, setSelectedChart] = useState<ChartType>("steps");
 
     const currentChartOption = CHART_OPTIONS.find((o) => o.key === selectedChart)!;
 
     return (
-        <View className="flex-1 bg-charcoal-950">
+        <View style={{ flex: 1, backgroundColor: currentTheme.colors.background.primary }}>
             {/* Animated background */}
-            <AnimatedBackground preset="electric" intensity="subtle" />
+            <AnimatedBackground intensity="subtle" />
 
             <SafeAreaView className="flex-1">
                 <ScrollView
@@ -89,7 +91,7 @@ export default function StatsScreen() {
                         <RefreshControl
                             refreshing={isLoading}
                             onRefresh={refresh}
-                            tintColor="#A459FF"
+                            tintColor={currentTheme.colors.primary.primary}
                         />
                     }
                 >

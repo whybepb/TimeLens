@@ -1,5 +1,6 @@
 export { AICoachCard } from "./AICoachCard";
 export { AnimatedBackground } from "./AnimatedBackground";
+export { BreathingCircle } from "./BreathingCircle";
 export { CalendarHeatmap } from "./CalendarHeatmap";
 export { CircularProgress } from "./CircularProgress";
 export { CoachInsightCard } from "./CoachInsightCard";
@@ -9,6 +10,7 @@ export { FocusTimer } from "./FocusTimer";
 export { GlassButton } from "./GlassButton";
 export { GlassCard } from "./GlassCard";
 export { GoalCard } from "./GoalCard";
+export { IntentionSetter } from "./IntentionSetter";
 export { PermissionCard } from "./PermissionCard";
 export type { PermissionStatus } from "./PermissionCard";
 export { ProgressRings } from "./ProgressRings";

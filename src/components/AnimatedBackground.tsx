@@ -1,10 +1,11 @@
 /**
- * AnimatedBackground - Floating gradient orbs for glassmorphic depth
- * Creates a dynamic, premium feel behind the UI
+ * AnimatedBackground - Enhanced with 5 orbs
+ * Features: Theme-based colors, color transitions, holiday themes
+ * No device motion to save battery
  */
 
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Dimensions, View } from "react-native";
 import Animated, {
     Easing,
@@ -14,6 +15,7 @@ import Animated, {
     withRepeat,
     withTiming,
 } from "react-native-reanimated";
+import { useTheme } from "../contexts";
 
 const { width, height } = Dimensions.get("window");
 
@@ -104,18 +106,109 @@ const AnimatedOrb: React.FC<AnimatedOrbProps> = ({
     );
 };
 
-type OrbPreset = "default" | "violet" | "electric" | "warm" | "minimal";
+type HolidayPreset = "christmas" | "halloween" | "newyear" | "valentines";
 
 interface AnimatedBackgroundProps {
-    preset?: OrbPreset;
     intensity?: "subtle" | "medium" | "vibrant";
+    holidayPreset?: HolidayPreset | null;
 }
 
-const ORB_PRESETS: Record<OrbPreset, OrbConfig[]> = {
-    default: [
+const hexToRgba = (hex: string, opacity: number): string => {
+    hex = hex.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
+const getActiveHoliday = (): HolidayPreset | null => {
+    const now = new Date();
+    const month = now.getMonth();
+    const day = now.getDate();
+
+    if (month === 11 && day >= 20) return "christmas";
+    if (month === 9) return "halloween";
+    if (month === 0 && day <= 7) return "newyear";
+    if (month === 1 && day === 14) return "valentines";
+
+    return null;
+};
+
+const HOLIDAY_COLORS = {
+    christmas: {
+        primary: "#DC2626",
+        secondary: "#16A34A",
+        tertiary: "#FBBF24",
+    },
+    halloween: {
+        primary: "#F97316",
+        secondary: "#9333EA",
+        tertiary: "#1F2937",
+    },
+    newyear: {
+        primary: "#FBBF24",
+        secondary: "#94A3B8",
+        tertiary: "#A855F7",
+    },
+    valentines: {
+        primary: "#EC4899",
+        secondary: "#F43F5E",
+        tertiary: "#EF4444",
+    },
+};
+
+export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
+    intensity = "medium",
+    holidayPreset = null,
+}) => {
+    const { currentTheme } = useTheme();
+    const colorProgress = useSharedValue(0);
+    const prevThemeRef = useRef(currentTheme.name);
+
+    const activeHoliday = holidayPreset || getActiveHoliday();
+
+    const sizeMultiplier = intensity === "subtle" ? 0.7 : intensity === "vibrant" ? 1.3 : 1;
+    const opacityMultiplier = intensity === "subtle" ? 0.6 : intensity === "vibrant" ? 1.2 : 1;
+
+    const getOrbColors = () => {
+        if (activeHoliday) {
+            const holidayPalette = HOLIDAY_COLORS[activeHoliday];
+            return {
+                primary: holidayPalette.primary,
+                secondary: holidayPalette.secondary,
+                tertiary: holidayPalette.tertiary,
+            };
+        }
+        return {
+            primary: currentTheme.colors.primary.primary,
+            secondary: currentTheme.colors.secondary.primary,
+            tertiary: currentTheme.colors.primary.secondary,
+        };
+    };
+
+    const orbColors = getOrbColors();
+
+    // Animate color transitions when theme changes
+    useEffect(() => {
+        if (prevThemeRef.current !== currentTheme.name) {
+            colorProgress.value = 0;
+            colorProgress.value = withTiming(1, {
+                duration: 600,
+                easing: Easing.bezier(0.4, 0, 0.2, 1),
+            });
+            prevThemeRef.current = currentTheme.name;
+        }
+    }, [currentTheme.name]);
+
+    // 5 orb configurations
+    const orbs: OrbConfig[] = React.useMemo(() => [
+        // Orb 1 - Large primary (top-left)
         {
-            size: 300,
-            colors: ["rgba(164, 89, 255, 0.25)", "rgba(164, 89, 255, 0.05)"] as const,
+            size: 300 * sizeMultiplier,
+            colors: [
+                hexToRgba(orbColors.primary, 0.25 * opacityMultiplier),
+                hexToRgba(orbColors.primary, 0.05 * opacityMultiplier)
+            ] as const,
             initialX: -50,
             initialY: -80,
             animDuration: 8000,
@@ -123,9 +216,13 @@ const ORB_PRESETS: Record<OrbPreset, OrbConfig[]> = {
             moveX: 40,
             moveY: 30,
         },
+        // Orb 2 - Medium secondary (top-right)
         {
-            size: 250,
-            colors: ["rgba(26, 160, 255, 0.2)", "rgba(26, 160, 255, 0.02)"] as const,
+            size: 250 * sizeMultiplier,
+            colors: [
+                hexToRgba(orbColors.secondary, 0.2 * opacityMultiplier),
+                hexToRgba(orbColors.secondary, 0.02 * opacityMultiplier)
+            ] as const,
             initialX: width - 150,
             initialY: 100,
             animDuration: 10000,
@@ -133,9 +230,13 @@ const ORB_PRESETS: Record<OrbPreset, OrbConfig[]> = {
             moveX: -30,
             moveY: 40,
         },
+        // Orb 3 - Small tertiary (center)
         {
-            size: 200,
-            colors: ["rgba(34, 211, 238, 0.15)", "rgba(34, 211, 238, 0.02)"] as const,
+            size: 200 * sizeMultiplier,
+            colors: [
+                hexToRgba(orbColors.tertiary, 0.15 * opacityMultiplier),
+                hexToRgba(orbColors.secondary, 0.02 * opacityMultiplier)
+            ] as const,
             initialX: width / 2 - 100,
             initialY: height * 0.5,
             animDuration: 12000,
@@ -143,94 +244,35 @@ const ORB_PRESETS: Record<OrbPreset, OrbConfig[]> = {
             moveX: 25,
             moveY: -35,
         },
-    ],
-    violet: [
+        // Orb 4 - NEW: Medium-small (bottom-left)
         {
-            size: 350,
-            colors: ["rgba(164, 89, 255, 0.3)", "rgba(138, 61, 230, 0.05)"] as const,
-            initialX: -100,
-            initialY: -100,
-            animDuration: 9000,
-            delay: 0,
-            moveX: 50,
-            moveY: 40,
-        },
-        {
-            size: 280,
-            colors: ["rgba(180, 117, 255, 0.2)", "rgba(164, 89, 255, 0.02)"] as const,
-            initialX: width - 180,
-            initialY: height * 0.3,
+            size: 180 * sizeMultiplier,
+            colors: [
+                hexToRgba(orbColors.tertiary, 0.18 * opacityMultiplier),
+                hexToRgba(orbColors.primary, 0.03 * opacityMultiplier)
+            ] as const,
+            initialX: -30,
+            initialY: height * 0.7,
             animDuration: 11000,
-            delay: 500,
-            moveX: -40,
-            moveY: 30,
+            delay: 700,
+            moveX: 35,
+            moveY: -25,
         },
-    ],
-    electric: [
+        // Orb 5 - NEW: Small accent (top-right gap)
         {
-            size: 320,
-            colors: ["rgba(26, 160, 255, 0.3)", "rgba(0, 136, 230, 0.05)"] as const,
-            initialX: -80,
-            initialY: -60,
-            animDuration: 8500,
-            delay: 0,
-            moveX: 45,
-            moveY: 35,
-        },
-        {
-            size: 260,
-            colors: ["rgba(34, 211, 238, 0.25)", "rgba(26, 160, 255, 0.02)"] as const,
-            initialX: width - 160,
-            initialY: 150,
-            animDuration: 10500,
-            delay: 400,
-            moveX: -35,
-            moveY: 45,
-        },
-    ],
-    warm: [
-        {
-            size: 300,
-            colors: ["rgba(251, 191, 36, 0.2)", "rgba(245, 158, 11, 0.02)"] as const,
-            initialX: -60,
+            size: 150 * sizeMultiplier,
+            colors: [
+                hexToRgba(orbColors.secondary, 0.12 * opacityMultiplier),
+                hexToRgba(orbColors.tertiary, 0.02 * opacityMultiplier)
+            ] as const,
+            initialX: width * 0.6,
             initialY: -40,
-            animDuration: 9000,
-            delay: 0,
-            moveX: 40,
+            animDuration: 9500,
+            delay: 400,
+            moveX: -20,
             moveY: 30,
         },
-        {
-            size: 250,
-            colors: ["rgba(251, 113, 133, 0.2)", "rgba(244, 63, 94, 0.02)"] as const,
-            initialX: width - 140,
-            initialY: 120,
-            animDuration: 11000,
-            delay: 600,
-            moveX: -30,
-            moveY: 40,
-        },
-    ],
-    minimal: [
-        {
-            size: 400,
-            colors: ["rgba(164, 89, 255, 0.12)", "rgba(164, 89, 255, 0.02)"] as const,
-            initialX: -100,
-            initialY: -150,
-            animDuration: 15000,
-            delay: 0,
-            moveX: 30,
-            moveY: 20,
-        },
-    ],
-};
-
-export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
-    preset = "default",
-    intensity = "medium",
-}) => {
-    const orbs = ORB_PRESETS[preset];
-
-    const intensityMultiplier = intensity === "subtle" ? 0.5 : intensity === "vibrant" ? 1.3 : 1;
+    ], [orbColors, sizeMultiplier, opacityMultiplier]);
 
     return (
         <View
@@ -246,9 +288,8 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
         >
             {orbs.map((orb, index) => (
                 <AnimatedOrb
-                    key={index}
+                    key={`${currentTheme.name}-${activeHoliday || 'normal'}-${index}`}
                     {...orb}
-                    size={orb.size * intensityMultiplier}
                 />
             ))}
         </View>

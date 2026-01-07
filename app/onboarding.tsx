@@ -21,6 +21,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useTheme } from "@/src/contexts";
 import type { PermissionStatus } from "../src/components";
 import { AnimatedBackground, GlassButton } from "../src/components";
 import { getDataManager, getHealthService } from "../src/services";
@@ -168,6 +169,7 @@ export default function OnboardingScreen() {
     screenTime: "idle",
     notifications: "idle",
   });
+  const { currentTheme } = useTheme();
 
   const allGranted =
     permissions.health === "granted" &&
@@ -271,9 +273,9 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <View className="flex-1 bg-charcoal-950">
+    <View style={{ flex: 1, backgroundColor: currentTheme.colors.background.primary }}>
       {/* Animated background */}
-      <AnimatedBackground preset="violet" intensity="medium" />
+      <AnimatedBackground intensity="medium" />
 
       <SafeAreaView className="flex-1">
         <ScrollView

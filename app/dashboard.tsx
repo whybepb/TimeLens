@@ -13,10 +13,12 @@ import {
   Hand,
   Heart,
   Moon,
+  Palette,
   Shield,
   Smartphone,
   Target,
   Timer,
+  Wind,
 } from "lucide-react-native";
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -33,7 +35,7 @@ import {
   ProgressRings,
   StreakBadge,
 } from "../src/components";
-import { useAuth } from "../src/contexts";
+import { useAuth, useTheme } from "../src/contexts";
 import { useCoachAdvice, useGoals, useNotifications, useProductivityData, useShield, useStreaks } from "../src/hooks";
 import { getGoalService, getStreakService } from "../src/services";
 
@@ -53,6 +55,7 @@ const formatNumber = (num: number): string => {
 export default function Dashboard() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
+  const { currentTheme, themeName, setTheme, availableThemes } = useTheme();
 
   // Sync data from cloud on login
   useEffect(() => {
@@ -80,16 +83,13 @@ export default function Dashboard() {
   const { requestPermissions, sendTestNotification } = useNotifications();
 
   return (
-    <View className="flex-1 bg-charcoal-950">
+    <View style={{ flex: 1, backgroundColor: currentTheme.colors.background.primary }}>
       {/* Animated gradient orbs background */}
-      <AnimatedBackground preset="default" intensity="medium" />
+      <AnimatedBackground intensity="medium" />
 
       {/* Top gradient overlay for depth */}
       <LinearGradient
-        colors={[
-          "rgba(13, 13, 15, 0.3)",
-          "transparent",
-        ]}
+        colors={currentTheme.colors.gradients.glassOverlay as unknown as readonly [string, string, ...string[]]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 0.3 }}
         className="absolute top-0 left-0 right-0 h-40"
@@ -105,7 +105,7 @@ export default function Dashboard() {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={refresh}
-              tintColor="#A459FF"
+              tintColor={currentTheme.colors.primary.primary}
             />
           }
         >
@@ -144,23 +144,44 @@ export default function Dashboard() {
               className="mx-6 mb-5"
               activeOpacity={0.8}
             >
-              <View className="bg-white/[0.06] rounded-3xl p-5 border border-white/[0.1]">
+              <View style={{
+                backgroundColor: currentTheme.colors.glass.light,
+                borderColor: currentTheme.colors.glass.border,
+                borderWidth: 1,
+                borderRadius: 24,
+                padding: 20
+              }}>
                 <View className="flex-row items-center justify-between mb-4">
                   <View className="flex-row items-center gap-2">
-                    <View className="w-8 h-8 rounded-xl bg-electric-400/20 items-center justify-center">
-                      <Target size={16} color="#1AA0FF" />
+                    <View style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 12,
+                      backgroundColor: currentTheme.colors.secondary.glow,
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <Target size={16} color={currentTheme.colors.secondary.primary} />
                     </View>
-                    <Text className="text-white font-semibold">Today's Goals</Text>
+                    <Text style={{ color: currentTheme.colors.text.primary }} className="font-semibold">Today's Goals</Text>
                   </View>
-                  <View className="flex-row items-center gap-2 bg-white/[0.08] px-3 py-1.5 rounded-full">
-                    <Text className="text-white/70 text-sm font-medium">
+                  <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                    backgroundColor: currentTheme.colors.glass.white,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 20
+                  }}>
+                    <Text style={{ color: currentTheme.colors.text.secondary, fontSize: 14, fontWeight: '500' }}>
                       {completedCount}/{totalGoals}
                     </Text>
-                    <ChartBar size={14} color="rgba(255,255,255,0.5)" />
+                    <ChartBar size={14} color={currentTheme.colors.text.tertiary} />
                   </View>
                 </View>
                 <ProgressRings goals={progress} size={130} strokeWidth={7} showLegend={false} />
-                <Text className="text-center text-white/40 text-xs mt-3 font-medium">
+                <Text style={{ color: currentTheme.colors.text.muted }} className="text-center text-xs mt-3 font-medium">
                   Tap for detailed stats →
                 </Text>
               </View>
@@ -256,9 +277,23 @@ export default function Dashboard() {
               />
             </Animated.View>
 
-            {/* Shield Demo */}
+            {/* Breathe Button */}
             <Animated.View
               entering={FadeInDown.delay(700).duration(400)}
+              className="mt-3"
+            >
+              <GlassButton
+                title="Mindful Breathing"
+                onPress={() => router.push("/breathe")}
+                variant="secondary"
+                icon={Wind}
+                fullWidth
+              />
+            </Animated.View>
+
+            {/* Shield Demo */}
+            <Animated.View
+              entering={FadeInDown.delay(750).duration(400)}
               className="mt-3"
             >
               <GlassButton
@@ -291,9 +326,82 @@ export default function Dashboard() {
                 fullWidth
               />
             </Animated.View>
+
+            {/* Theme Selector */}
+            <Animated.View
+              entering={FadeInDown.delay(850).duration(400)}
+              className="mt-6"
+            >
+              <View style={{
+                backgroundColor: currentTheme.colors.glass.light,
+                borderColor: currentTheme.colors.glass.border,
+                borderWidth: 1,
+                borderRadius: 24,
+                padding: 20
+              }}>
+                <View className="flex-row items-center gap-2 mb-4">
+                  <View style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 12,
+                    backgroundColor: currentTheme.colors.primary.glow,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Palette size={16} color={currentTheme.colors.primary.primary} />
+                  </View>
+                  <Text style={{ color: currentTheme.colors.text.primary }} className="font-semibold">Theme</Text>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 12 }}
+                >
+                  {Object.keys(availableThemes).map((themeKey) => {
+                    const theme = availableThemes[themeKey];
+                    const isActive = themeName === themeKey;
+                    return (
+                      <TouchableOpacity
+                        key={themeKey}
+                        onPress={() => setTheme(themeKey)}
+                        className={`rounded-2xl p-4 border-2 ${isActive ? "border-white/40" : "border-white/10"
+                          }`}
+                        style={{
+                          backgroundColor: theme.colors.background.secondary,
+                          minWidth: 100,
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <View className="flex-row gap-2 mb-2">
+                          <View
+                            className="w-6 h-6 rounded-full"
+                            style={{ backgroundColor: theme.colors.primary.primary }}
+                          />
+                          <View
+                            className="w-6 h-6 rounded-full"
+                            style={{ backgroundColor: theme.colors.secondary.primary }}
+                          />
+                        </View>
+                        <Text
+                          className="text-sm font-semibold"
+                          style={{ color: theme.colors.text.primary }}
+                        >
+                          {theme.displayName}
+                        </Text>
+                        {isActive && (
+                          <Text className="text-xs mt-1" style={{ color: theme.colors.text.tertiary }}>
+                            Active
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            </Animated.View>
           </Animated.View>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </View >
   );
 }

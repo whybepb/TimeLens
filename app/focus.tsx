@@ -19,6 +19,8 @@ import {
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+
+import { useTheme } from "@/src/contexts";
 import {
     AnimatedBackground,
     FocusTimer,
@@ -31,6 +33,7 @@ export default function FocusScreen() {
     const router = useRouter();
     const [showSettings, setShowSettings] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
+    const { currentTheme } = useTheme();
 
     const {
         timerState,
@@ -56,10 +59,9 @@ export default function FocusScreen() {
     const isCompleted = timerState === "completed";
 
     return (
-        <View className="flex-1 bg-charcoal-950">
+        <View style={{ flex: 1, backgroundColor: currentTheme.colors.background.primary }}>
             {/* Animated background */}
             <AnimatedBackground
-                preset={sessionType === "focus" ? "violet" : "electric"}
                 intensity="subtle"
             />
 
@@ -235,7 +237,13 @@ export default function FocusScreen() {
             {/* Settings Modal */}
             <Modal visible={showSettings} transparent animationType="fade">
                 <View className="flex-1 bg-black/70 justify-center px-6">
-                    <View className="bg-charcoal-800 rounded-3xl p-6 border border-charcoal-700">
+                    <View style={{
+                        backgroundColor: currentTheme.colors.background.elevated,
+                        borderRadius: 24,
+                        padding: 24,
+                        borderWidth: 1,
+                        borderColor: currentTheme.colors.glass.border
+                    }}>
                         <Text className="text-white text-xl font-bold mb-6">Timer Settings</Text>
 
                         {/* Focus Duration */}
@@ -247,8 +255,8 @@ export default function FocusScreen() {
                                         key={mins}
                                         onPress={() => updateSettings({ focusDuration: mins })}
                                         className={`flex-1 py-3 rounded-xl items-center ${settings.focusDuration === mins
-                                                ? "bg-violet-500/30 border border-violet-500"
-                                                : "bg-white/10"
+                                            ? "bg-violet-500/30 border border-violet-500"
+                                            : "bg-white/10"
                                             }`}
                                     >
                                         <Text
@@ -272,8 +280,8 @@ export default function FocusScreen() {
                                         key={mins}
                                         onPress={() => updateSettings({ shortBreakDuration: mins })}
                                         className={`flex-1 py-3 rounded-xl items-center ${settings.shortBreakDuration === mins
-                                                ? "bg-emerald-500/30 border border-emerald-500"
-                                                : "bg-white/10"
+                                            ? "bg-emerald-500/30 border border-emerald-500"
+                                            : "bg-white/10"
                                             }`}
                                     >
                                         <Text
@@ -297,8 +305,8 @@ export default function FocusScreen() {
                                         key={mins}
                                         onPress={() => updateSettings({ longBreakDuration: mins })}
                                         className={`flex-1 py-3 rounded-xl items-center ${settings.longBreakDuration === mins
-                                                ? "bg-cyan-500/30 border border-cyan-500"
-                                                : "bg-white/10"
+                                            ? "bg-cyan-500/30 border border-cyan-500"
+                                            : "bg-white/10"
                                             }`}
                                     >
                                         <Text
@@ -326,7 +334,15 @@ export default function FocusScreen() {
             {/* History Modal */}
             <Modal visible={showHistory} transparent animationType="fade">
                 <View className="flex-1 bg-black/70 justify-end">
-                    <View className="bg-charcoal-800 rounded-t-3xl p-6 max-h-[70%] border-t border-charcoal-700">
+                    <View style={{
+                        backgroundColor: currentTheme.colors.background.elevated,
+                        borderTopLeftRadius: 24,
+                        borderTopRightRadius: 24,
+                        padding: 24,
+                        maxHeight: '70%',
+                        borderTopWidth: 1,
+                        borderColor: currentTheme.colors.glass.border
+                    }}>
                         <View className="flex-row items-center justify-between mb-4">
                             <Text className="text-white text-xl font-bold">Session History</Text>
                             <TouchableOpacity onPress={() => setShowHistory(false)}>

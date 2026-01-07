@@ -27,6 +27,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useTheme } from "@/src/contexts";
 import { AnimatedBackground, GlassButton } from "../src/components";
 import { getAppwriteService } from "../src/services";
 
@@ -120,6 +121,7 @@ export default function AuthScreen() {
     const [name, setName] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const { currentTheme } = useTheme();
 
     const appwrite = getAppwriteService();
 
@@ -174,9 +176,9 @@ export default function AuthScreen() {
     };
 
     return (
-        <View className="flex-1 bg-charcoal-950">
+        <View style={{ flex: 1, backgroundColor: currentTheme.colors.background.primary }}>
             {/* Animated gradient orbs background */}
-            <AnimatedBackground preset="violet" intensity="vibrant" />
+            <AnimatedBackground intensity="vibrant" />
 
             <SafeAreaView className="flex-1">
                 <KeyboardAvoidingView
