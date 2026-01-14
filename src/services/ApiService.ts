@@ -6,8 +6,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // API Configuration
-// Use your Mac's IP for physical device testing, localhost for simulator
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://10.51.11.106:3001";
+// Use environment variable or production Render URL
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "https://timelens-backend.onrender.com";
 
 // Storage keys
 const TOKEN_KEY = "@timelens/auth_token";
