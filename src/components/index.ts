@@ -1,5 +1,6 @@
 export { AICoachCard } from "./AICoachCard";
 export { AnimatedBackground } from "./AnimatedBackground";
+export { BackButton } from "./BackButton";
 export { BreathingCircle } from "./BreathingCircle";
 export { CalendarHeatmap } from "./CalendarHeatmap";
 export { CircularProgress } from "./CircularProgress";
@@ -14,6 +15,7 @@ export { IntentionSetter } from "./IntentionSetter";
 export { PermissionCard } from "./PermissionCard";
 export type { PermissionStatus } from "./PermissionCard";
 export { ProgressRings } from "./ProgressRings";
+export { QuickActionTile } from "./QuickActionTile";
 export { ShieldOverlay } from "./ShieldOverlay";
 export { StreakBadge } from "./StreakBadge";
 export { WeeklyChart } from "./WeeklyChart";

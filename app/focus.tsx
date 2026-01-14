@@ -5,7 +5,7 @@
 
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
-import { ArrowLeft, History, Settings2, Sparkles, Timer } from "lucide-react-native";
+import { History, Settings2, Sparkles, Timer } from "lucide-react-native";
 import React, { useState } from "react";
 import {
     Modal,
@@ -23,6 +23,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/src/contexts";
 import {
     AnimatedBackground,
+    BackButton,
     FocusTimer,
     GlassButton,
     GlassCard,
@@ -71,30 +72,39 @@ export default function FocusScreen() {
                     entering={FadeInDown.duration(400)}
                     className="flex-row items-center justify-between px-6 py-4"
                 >
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        className="w-10 h-10 rounded-xl bg-white/[0.08] items-center justify-center"
-                    >
-                        <ArrowLeft size={20} color="#fff" />
-                    </TouchableOpacity>
+                    <BackButton onPress={() => router.back()} />
 
                     <View className="flex-row items-center gap-2">
-                        <Timer size={20} color="#A459FF" />
-                        <Text className="text-white font-bold text-lg">Focus</Text>
+                        <Timer size={20} color={currentTheme.colors.primary.primary} />
+                        <Text style={{ color: currentTheme.colors.text.primary, fontWeight: "700", fontSize: 18 }}>Focus</Text>
                     </View>
 
                     <View className="flex-row gap-2">
                         <TouchableOpacity
                             onPress={() => setShowHistory(true)}
-                            className="w-10 h-10 rounded-xl bg-white/[0.08] items-center justify-center"
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 12,
+                                backgroundColor: currentTheme.colors.glass.light,
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
                         >
-                            <History size={18} color="rgba(255,255,255,0.6)" />
+                            <History size={18} color={currentTheme.colors.text.secondary} />
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => setShowSettings(true)}
-                            className="w-10 h-10 rounded-xl bg-white/[0.08] items-center justify-center"
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 12,
+                                backgroundColor: currentTheme.colors.glass.light,
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
                         >
-                            <Settings2 size={18} color="rgba(255,255,255,0.6)" />
+                            <Settings2 size={18} color={currentTheme.colors.text.secondary} />
                         </TouchableOpacity>
                     </View>
                 </Animated.View>

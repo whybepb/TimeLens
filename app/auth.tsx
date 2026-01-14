@@ -27,9 +27,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useTheme } from "@/src/contexts";
+import { useAuth, useTheme } from "@/src/contexts";
 import { AnimatedBackground, GlassButton } from "../src/components";
-import { getAppwriteService } from "../src/services";
 
 type AuthMode = "login" | "signup";
 
@@ -122,8 +121,7 @@ export default function AuthScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const { currentTheme } = useTheme();
-
-    const appwrite = getAppwriteService();
+    const { login, register } = useAuth();
 
     const handleSubmit = async () => {
         // Validation
@@ -146,7 +144,7 @@ export default function AuthScreen() {
 
         try {
             if (mode === "login") {
-                const user = await appwrite.login(email.trim(), password);
+                const user = await login(email.trim(), password);
                 if (user) {
                     console.log("[Auth] Login successful:", user.email);
                     router.replace("/dashboard");
@@ -154,7 +152,7 @@ export default function AuthScreen() {
                     Alert.alert("Login Failed", "Invalid email or password");
                 }
             } else {
-                const user = await appwrite.createAccount(email.trim(), password, name.trim());
+                const user = await register(email.trim(), password, name.trim());
                 if (user) {
                     console.log("[Auth] Signup successful:", user.email);
                     router.replace("/onboarding");
@@ -354,7 +352,7 @@ export default function AuthScreen() {
                             {/* Skip for now (dev option) */}
                             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
                                 <TouchableOpacity
-                                    onPress={() => router.replace("/dashboard")}
+                                    onPress={() => router.replace("/onboarding")}
                                     className="mt-6 py-3 items-center"
                                 >
                                     <Text className="text-white/30 text-sm">

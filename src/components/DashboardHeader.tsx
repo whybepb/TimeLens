@@ -1,6 +1,12 @@
+/**
+ * DashboardHeader - Enhanced with theme support and avatar placeholder
+ */
+
+import { LinearGradient } from "expo-linear-gradient";
 import { LogOut, Settings } from "lucide-react-native";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../contexts";
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -17,34 +23,94 @@ const getGreeting = (): string => {
   return "Good Night";
 };
 
+const getInitials = (name: string): string => {
+  const parts = name.split(" ");
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
+
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-  userName = "there",
+  userName = "Explorer",
   onSettingsPress,
   onLogout,
   isAuthenticated = false,
 }) => {
+  const { currentTheme } = useTheme();
+
   return (
-    <View className="flex-row items-center justify-between">
-      <View>
-        <Text className="text-white/60 text-sm">{getGreeting()}</Text>
-        <Text className="text-white text-2xl font-bold">{userName}</Text>
+    <View className="flex-row items-center justify-between flex-1">
+      <View className="flex-row items-center gap-3">
+        {/* Avatar with gradient */}
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            overflow: "hidden",
+          }}
+        >
+          <LinearGradient
+            colors={[currentTheme.colors.primary.primary, currentTheme.colors.secondary.primary]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 16 }}>
+              {getInitials(userName)}
+            </Text>
+          </LinearGradient>
+        </View>
+
+        <View>
+          <Text style={{ color: currentTheme.colors.text.tertiary, fontSize: 13 }}>
+            {getGreeting()}
+          </Text>
+          <Text style={{ color: currentTheme.colors.text.primary, fontSize: 20, fontWeight: "700" }}>
+            {userName}
+          </Text>
+        </View>
       </View>
+
       <View className="flex-row gap-2">
         {isAuthenticated && onLogout && (
           <TouchableOpacity
             onPress={onLogout}
-            className="w-11 h-11 rounded-full bg-red-500/20 items-center justify-center border border-red-500/30"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: `${currentTheme.colors.semantic.error}20`,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: 1,
+              borderColor: `${currentTheme.colors.semantic.error}30`,
+            }}
             activeOpacity={0.7}
           >
-            <LogOut size={20} color="#FF6B6B" />
+            <LogOut size={18} color={currentTheme.colors.semantic.error} />
           </TouchableOpacity>
         )}
         <TouchableOpacity
           onPress={onSettingsPress}
-          className="w-11 h-11 rounded-full bg-white/10 items-center justify-center border border-white/20"
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: currentTheme.colors.glass.light,
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 1,
+            borderColor: currentTheme.colors.glass.border,
+          }}
           activeOpacity={0.7}
         >
-          <Settings size={22} color="rgba(255,255,255,0.8)" />
+          <Settings size={20} color={currentTheme.colors.text.secondary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -52,4 +118,3 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 };
 
 export default DashboardHeader;
-

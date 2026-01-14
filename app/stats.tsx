@@ -5,7 +5,7 @@
 
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
-import { ArrowLeft, Flame, Target, TrendingUp } from "lucide-react-native";
+import { Flame, Target, TrendingUp } from "lucide-react-native";
 import React, { useState } from "react";
 import { Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
     AnimatedBackground,
+    BackButton,
     CalendarHeatmap,
     GlassCard,
     GoalCard,
@@ -44,26 +45,29 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
     iconColor,
     title,
     rightElement,
-}) => (
-    <View className="flex-row items-center justify-between mb-4">
-        <View className="flex-row items-center gap-3">
-            <View
-                style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 12,
-                    backgroundColor: `${iconColor}20`,
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-            >
-                <Icon size={18} color={iconColor} />
+}) => {
+    const { currentTheme } = useTheme();
+    return (
+        <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-row items-center gap-3">
+                <View
+                    style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 12,
+                        backgroundColor: `${iconColor}20`,
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <Icon size={18} color={iconColor} />
+                </View>
+                <Text style={{ color: currentTheme.colors.text.primary, fontWeight: "600", fontSize: 18 }}>{title}</Text>
             </View>
-            <Text className="text-white font-semibold text-lg">{title}</Text>
+            {rightElement}
         </View>
-        {rightElement}
-    </View>
-);
+    );
+};
 
 export default function StatsScreen() {
     const router = useRouter();
@@ -100,13 +104,8 @@ export default function StatsScreen() {
                         entering={FadeInDown.duration(400)}
                         className="flex-row items-center justify-between px-6 py-4"
                     >
-                        <TouchableOpacity
-                            onPress={() => router.back()}
-                            className="w-10 h-10 rounded-xl bg-white/[0.08] items-center justify-center"
-                        >
-                            <ArrowLeft size={20} color="#fff" />
-                        </TouchableOpacity>
-                        <Text className="text-white font-bold text-xl">Statistics</Text>
+                        <BackButton onPress={() => router.back()} />
+                        <Text style={{ color: currentTheme.colors.text.primary, fontWeight: "700", fontSize: 20 }}>Statistics</Text>
                         <View className="w-10" />
                     </Animated.View>
 

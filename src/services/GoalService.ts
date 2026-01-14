@@ -4,7 +4,7 @@
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAppwriteService } from "./AppwriteService";
+import { getApiService } from "./ApiService";
 
 // ============================================================================
 // Types
@@ -128,8 +128,12 @@ class GoalService {
    * Sync goals to Appwrite cloud
    */
   private async syncToCloud(): Promise<void> {
-    const appwrite = getAppwriteService();
-    await appwrite.saveUserGoals(this.goals);
+    const api = getApiService();
+    if (!api.hasToken()) {
+      console.log("[GoalService] Skipping cloud sync - not authenticated");
+      return;
+    }
+    await api.saveUserGoals(this.goals);
   }
 
   /**
@@ -138,8 +142,12 @@ class GoalService {
    */
   public async syncFromCloud(): Promise<void> {
     try {
-      const appwrite = getAppwriteService();
-      const cloudGoals = await appwrite.getUserGoals();
+      const api = getApiService();
+      if (!api.hasToken()) {
+        console.log("[GoalService] Skipping cloud sync - not authenticated");
+        return;
+      }
+      const cloudGoals = await api.getUserGoals();
 
       if (cloudGoals) {
         console.log("[GoalService] Cloud goals found, overwriting local:", cloudGoals);
@@ -148,9 +156,6 @@ class GoalService {
         this.notifySubscribers();
       } else {
         console.log("[GoalService] No cloud goals found, keeping local/defaults");
-        // Optional: If we have local changes, maybe push them? 
-        // For now, let's treat "no cloud data" as "nothing to restore"
-        // If the user has local data, it will be synced to cloud on next modification
       }
     } catch (error) {
       console.error("[GoalService] Failed to sync from cloud:", error);

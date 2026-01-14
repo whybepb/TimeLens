@@ -6,7 +6,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
-  Bell,
   ChartBar,
   Focus,
   Footprints,
@@ -18,7 +17,7 @@ import {
   Smartphone,
   Target,
   Timer,
-  Wind,
+  Wind
 } from "lucide-react-native";
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -31,8 +30,8 @@ import {
   CircularProgress,
   DashboardHeader,
   DataCard,
-  GlassButton,
   ProgressRings,
+  QuickActionTile,
   StreakBadge,
 } from "../src/components";
 import { useAuth, useTheme } from "../src/contexts";
@@ -248,156 +247,106 @@ export default function Dashboard() {
               />
             </Animated.View>
 
-            {/* View Stats Button */}
+            {/* Quick Actions Grid - 2x2 */}
             <Animated.View
               entering={FadeInDown.delay(500).duration(400)}
               className="mt-5"
             >
-              <GlassButton
-                title="View Statistics & Goals"
-                onPress={() => router.push("/stats")}
-                variant="secondary"
-                icon={ChartBar}
-                fullWidth
-              />
+              <View className="flex-row gap-3 mb-3">
+                <QuickActionTile
+                  icon={Timer}
+                  label="Focus"
+                  onPress={() => router.push("/focus")}
+                  variant="gradient"
+                  gradientColors={["#A459FF", "#7021CC"]}
+                />
+                <QuickActionTile
+                  icon={Wind}
+                  label="Breathe"
+                  onPress={() => router.push("/breathe")}
+                  variant="gradient"
+                  gradientColors={["#22D3EE", "#0EA5E9"]}
+                />
+              </View>
+              <View className="flex-row gap-3">
+                <QuickActionTile
+                  icon={ChartBar}
+                  label="Stats"
+                  onPress={() => router.push("/stats")}
+                  variant="glass"
+                />
+                <QuickActionTile
+                  icon={Shield}
+                  label="Shield"
+                  onPress={() => demoTrigger("Instagram")}
+                  variant="glass"
+                />
+              </View>
             </Animated.View>
 
-            {/* Focus Shield Demo - v0 feature preview */}
+            {/* Theme Selector - Compact Pills */}
             <Animated.View
               entering={FadeInDown.delay(600).duration(400)}
-              className="mt-3"
+              className="mt-6 mb-4"
             >
-              <GlassButton
-                title="Start Focus Session"
-                onPress={() => router.push("/focus")}
-                variant="gradient"
-                gradientColors={["#A459FF", "#7021CC"]}
-                icon={Timer}
-                fullWidth
-              />
-            </Animated.View>
-
-            {/* Breathe Button */}
-            <Animated.View
-              entering={FadeInDown.delay(700).duration(400)}
-              className="mt-3"
-            >
-              <GlassButton
-                title="Mindful Breathing"
-                onPress={() => router.push("/breathe")}
-                variant="secondary"
-                icon={Wind}
-                fullWidth
-              />
-            </Animated.View>
-
-            {/* Shield Demo */}
-            <Animated.View
-              entering={FadeInDown.delay(750).duration(400)}
-              className="mt-3"
-            >
-              <GlassButton
-                title="Try Focus Shield"
-                onPress={() => demoTrigger("Instagram")}
-                variant="ghost"
-                icon={Shield}
-                fullWidth
-              />
-            </Animated.View>
-
-            {/* Test Notifications */}
-            <Animated.View
-              entering={FadeInDown.delay(800).duration(400)}
-              className="mt-3"
-            >
-              <GlassButton
-                title="Test Notifications"
-                onPress={async () => {
-                  const granted = await requestPermissions();
-                  if (granted) {
-                    sendTestNotification();
-                    Alert.alert("Success", "Check your notification center!");
-                  } else {
-                    Alert.alert("Permission Denied", "Enable notifications in Settings.");
-                  }
-                }}
-                variant="ghost"
-                icon={Bell}
-                fullWidth
-              />
-            </Animated.View>
-
-            {/* Theme Selector */}
-            <Animated.View
-              entering={FadeInDown.delay(850).duration(400)}
-              className="mt-6"
-            >
-              <View style={{
-                backgroundColor: currentTheme.colors.glass.light,
-                borderColor: currentTheme.colors.glass.border,
-                borderWidth: 1,
-                borderRadius: 24,
-                padding: 20
-              }}>
-                <View className="flex-row items-center gap-2 mb-4">
-                  <View style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 12,
-                    backgroundColor: currentTheme.colors.primary.glow,
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Palette size={16} color={currentTheme.colors.primary.primary} />
-                  </View>
-                  <Text style={{ color: currentTheme.colors.text.primary }} className="font-semibold">Theme</Text>
-                </View>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: 12 }}
-                >
-                  {Object.keys(availableThemes).map((themeKey) => {
-                    const theme = availableThemes[themeKey];
-                    const isActive = themeName === themeKey;
-                    return (
-                      <TouchableOpacity
-                        key={themeKey}
-                        onPress={() => setTheme(themeKey)}
-                        className={`rounded-2xl p-4 border-2 ${isActive ? "border-white/40" : "border-white/10"
-                          }`}
-                        style={{
-                          backgroundColor: theme.colors.background.secondary,
-                          minWidth: 100,
-                        }}
-                        activeOpacity={0.7}
-                      >
-                        <View className="flex-row gap-2 mb-2">
-                          <View
-                            className="w-6 h-6 rounded-full"
-                            style={{ backgroundColor: theme.colors.primary.primary }}
-                          />
-                          <View
-                            className="w-6 h-6 rounded-full"
-                            style={{ backgroundColor: theme.colors.secondary.primary }}
-                          />
-                        </View>
-                        <Text
-                          className="text-sm font-semibold"
-                          style={{ color: theme.colors.text.primary }}
-                        >
-                          {theme.displayName}
-                        </Text>
-                        {isActive && (
-                          <Text className="text-xs mt-1" style={{ color: theme.colors.text.tertiary }}>
-                            Active
-                          </Text>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
+              <View className="flex-row items-center gap-2 mb-3 px-1">
+                <Palette size={16} color={currentTheme.colors.text.tertiary} />
+                <Text style={{ color: currentTheme.colors.text.tertiary, fontSize: 12, fontWeight: '500' }}>
+                  Theme
+                </Text>
               </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 8 }}
+              >
+                {Object.keys(availableThemes).map((themeKey) => {
+                  const theme = availableThemes[themeKey];
+                  const isActive = themeName === themeKey;
+                  return (
+                    <TouchableOpacity
+                      key={themeKey}
+                      onPress={() => setTheme(themeKey)}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 8,
+                        paddingHorizontal: 14,
+                        paddingVertical: 10,
+                        borderRadius: 20,
+                        backgroundColor: isActive
+                          ? currentTheme.colors.primary.glow
+                          : currentTheme.colors.glass.light,
+                        borderWidth: 1,
+                        borderColor: isActive
+                          ? currentTheme.colors.primary.primary
+                          : currentTheme.colors.glass.border,
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View
+                        style={{
+                          width: 16,
+                          height: 16,
+                          borderRadius: 8,
+                          backgroundColor: theme.colors.primary.primary,
+                        }}
+                      />
+                      <Text
+                        style={{
+                          color: isActive
+                            ? currentTheme.colors.primary.primary
+                            : currentTheme.colors.text.secondary,
+                          fontSize: 13,
+                          fontWeight: isActive ? '600' : '400',
+                        }}
+                      >
+                        {theme.displayName}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
             </Animated.View>
           </Animated.View>
         </ScrollView>

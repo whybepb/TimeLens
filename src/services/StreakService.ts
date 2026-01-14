@@ -4,7 +4,7 @@
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAppwriteService } from "./AppwriteService";
+import { getApiService } from "./ApiService";
 
 // ============================================================================
 // Types
@@ -176,10 +176,14 @@ class StreakService {
      */
     public async syncFromCloud(): Promise<void> {
         try {
-            const appwrite = getAppwriteService();
+            const api = getApiService();
+            if (!api.hasToken()) {
+                console.log("[StreakService] Skipping cloud sync - not authenticated");
+                return;
+            }
 
             // 1. Get streaks
-            const cloudStreaks = await appwrite.getStreaks();
+            const cloudStreaks = await api.getStreaks();
             if (cloudStreaks) {
                 console.log("[StreakService] Cloud streaks found, merging...");
                 this.streaks = {
@@ -193,11 +197,10 @@ class StreakService {
             }
 
             // 2. Get daily logs
-            const cloudLogs = await appwrite.getDailyLogs(90);
+            const cloudLogs = await api.getDailyLogs(90);
             if (cloudLogs.length > 0) {
                 console.log(`[StreakService] Found ${cloudLogs.length} cloud logs, updating local`);
-                // For now, simpler to overwrite local logs with cloud source of truth on restore
-                this.dailyLogs = cloudLogs;
+                this.dailyLogs = cloudLogs as DailyLog[];
             }
 
             await this.saveToStorage();
@@ -212,10 +215,14 @@ class StreakService {
      * Sync streaks and logs to Appwrite cloud
      */
     private async syncToCloud(): Promise<void> {
-        const appwrite = getAppwriteService();
+        const api = getApiService();
+        if (!api.hasToken()) {
+            console.log("[StreakService] Skipping cloud sync - not authenticated");
+            return;
+        }
 
-        // Convert StreakData to Appwrite format
-        const streaksForAppwrite = {
+        // Convert StreakData to API format
+        const streaksForApi = {
             steps: {
                 currentStreak: this.streaks.steps.currentStreak,
                 longestStreak: this.streaks.steps.longestStreak,
@@ -243,15 +250,16 @@ class StreakService {
             },
         };
 
-        await appwrite.saveStreaks(streaksForAppwrite);
+        await api.saveStreaks(streaksForApi);
     }
 
     /**
      * Sync daily log to Appwrite
      */
     private async syncDailyLogToCloud(log: DailyLog): Promise<void> {
-        const appwrite = getAppwriteService();
-        await appwrite.saveDailyLog(log);
+        const api = getApiService();
+        if (!api.hasToken()) return;
+        await api.saveDailyLog(log);
     }
 
     // ============================================================================
