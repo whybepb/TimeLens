@@ -74,6 +74,7 @@ function RootLayoutNav() {
         <Stack.Screen name="dashboard" />
         <Stack.Screen name="stats" />
         <Stack.Screen name="breathe" />
+        <Stack.Screen name="settings" />
       </Stack>
 
       {/* Focus Shield Overlay - intercepts blacklisted apps */}

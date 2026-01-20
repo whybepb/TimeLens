@@ -115,7 +115,7 @@ export default function Dashboard() {
           >
             <DashboardHeader
               userName={user?.name || "Explorer"}
-              onSettingsPress={() => Alert.alert("Settings", "Settings screen coming soon!")}
+              onSettingsPress={() => router.push("/settings")}
               onLogout={logout}
               isAuthenticated={isAuthenticated}
             />

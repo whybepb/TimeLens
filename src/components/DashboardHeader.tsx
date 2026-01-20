@@ -3,7 +3,7 @@
  */
 
 import { LinearGradient } from "expo-linear-gradient";
-import { LogOut, Settings } from "lucide-react-native";
+import { Settings } from "lucide-react-native";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../contexts";
@@ -78,24 +78,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </View>
 
       <View className="flex-row gap-2">
-        {isAuthenticated && onLogout && (
-          <TouchableOpacity
-            onPress={onLogout}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: `${currentTheme.colors.semantic.error}20`,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: 1,
-              borderColor: `${currentTheme.colors.semantic.error}30`,
-            }}
-            activeOpacity={0.7}
-          >
-            <LogOut size={18} color={currentTheme.colors.semantic.error} />
-          </TouchableOpacity>
-        )}
         <TouchableOpacity
           onPress={onSettingsPress}
           style={{
