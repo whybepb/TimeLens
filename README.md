@@ -1,6 +1,11 @@
 # TimeLens ⏱️
 
 > A premium productivity and wellness app that combines focus tracking, health metrics, and intelligent coaching to help you achieve your daily goals.
+## 🎥 Demo
+
+Watch TimeLens in action:  
+👉 https://youtu.be/dQAObChg_D4
+
 
 ![React Native](https://img.shields.io/badge/React_Native-0.81.5-61DAFB?style=flat&logo=react)
 ![Expo](https://img.shields.io/badge/Expo-54.0-000020?style=flat&logo=expo)
